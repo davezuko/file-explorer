@@ -1,22 +1,20 @@
 {
-  // NOTE: These options are overridden in webpack.config.js.
-  "compilerOptions": {
-      "target": "ES6",
-      "module": "ES6",
-      "moduleResolution": "node",
-      "sourceMap": true,
-      "noImplicitAny": true,
-      "noImplicitReturns": true,
-      "noEmitOnError": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": false,
-      "suppressImplicitAnyIndexErrors": true,
-      "removeComments": false,
-      "jsx": "react",
-      "outDir": "dist",
-      "allowSyntheticDefaultImports": true
-  },
-  "exclude": [
-      "node_modules"
-  ]
+    "include": ["src/**/*"],
+    "compilerOptions": {
+        "forceConsistentCasingInFileNames": true,
+        "importHelpers": true,
+        "isolatedModules": true,
+        "jsx": "react-jsx",
+        "lib": ["ES2019", "DOM"],
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "jsxImportSource": "react",
+        "outDir": "dist",
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "ES2020",
+        "useDefineForClassFields": true
+    }
 }

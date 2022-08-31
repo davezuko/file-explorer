@@ -1,42 +1,47 @@
 {
-  "name": "webpack-start",
-  "version": "1.0.0",
-  "repository": "git@github.com:gianluca-venturini/express-react-webpack-starter.git",
-  "author": "Gianluca Venturini <gianluca@stellarite.io>",
-  "license": "MIT",
-  "scripts": {
-    "build": "PROJECTS=frontend,backend webpack --progress --colors",
-    "test": "PROJECTS=test webpack --progress --colors && node --inspect ./node_modules/jasmine/bin/jasmine.js dist/test.js",
-    "build-watch": "PROJECTS=frontend,backend WATCH=true webpack --progress --colors",
-    "start": "node --inspect dist/server.js",
-    "build-hot-reload": "PROJECTS=frontend webpack-dev-server --mode=development",
-    "clean": "rm -rf node_modules/ dist/"
-  },
-  "engines": {
-    "yarn": "^1.10.1",
-    "node": ">=10.18.0"
-  },
-  "devDependencies": {
-    "@types/express": "^4.17.6",
-    "@types/jasmine": "^3.5.10",
-    "@types/node-fetch": "^2.5.7",
-    "@types/react": "^16.9.35",
-    "@types/react-dom": "^16.9.8",
-    "@types/webpack-env": "^1.15.2",
-    "html-webpack-plugin": "^3.2.0",
-    "jasmine": "^3.5.0",
-    "node-fetch": "^2.6.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "source-map-support": "^0.5.19",
-    "ts-loader": "^6.2.1",
-    "typescript": "^3.7.4",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.10.1",
-    "webpack-node-externals": "^1.7.2"
-  },
-  "dependencies": {
-    "express": "^4.17.1"
-  }
+    "name": "file-explorer",
+    "version": "1.0.0",
+    "repository": "https://github.com/davezuko/file-explorer",
+    "author": "David Zukowski",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "build-hot-reload": "node ./scripts/start.js",
+        "build": "node ./scripts/build.js",
+        "clean": "rm -rf node_modules/ dist/",
+        "serve": "node ./scripts/serve.js",
+        "start": "node ./scripts/start.js --devtools",
+        "test": "echo 'not implemented'"
+    },
+    "engines": {
+        "yarn": "^1.10.1",
+        "node": ">=10.18.0"
+    },
+    "prettier": "@davezuko/prettier-config",
+    "eslintConfig": {
+        "extends": "@davezuko/eslint-config",
+        "ignorePatterns": [
+            "dist"
+        ]
+    },
+    "devDependencies": {
+        "@davezuko/eslint-config": "^0.2.0",
+        "@davezuko/prettier-config": "^0.1.0",
+        "@types/node": "^18.7.13",
+        "@types/react": "^18.0.17",
+        "@types/react-dom": "^18.0.6",
+        "compression": "^1.7.4",
+        "connect": "^3.7.0",
+        "esbuild": "^0.15.5",
+        "eslint": "^8.22.0",
+        "html-minifier-terser": "7.0.0",
+        "mobx": "^6.6.1",
+        "mobx-react-lite": "^3.4.0",
+        "preact": "^10.10.6",
+        "prettier": "^2.7.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "serve-static": "^1.15.0",
+        "typescript": "^4.7.4"
+    }
 }
