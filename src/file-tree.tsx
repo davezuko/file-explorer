@@ -1,3 +1,4 @@
+import "./file-tree.css"
 import {useCallback, useMemo} from "react"
 import {observer} from "mobx-react-lite"
 import {FSTreeItem, FSTreeVirtualizer, FSViewModel} from "./file-system"
@@ -6,13 +7,14 @@ import {Virtualizer} from "./virtualizer"
 export let FileTree = ({view}: {view: FSViewModel}) => {
     const virtualizer = useMemo(() => new FSTreeVirtualizer(view), [view])
     const renderItem = useCallback(
-        ({item, depth}: FSTreeItem) => {
+        ({item, depth}: FSTreeItem, style: React.CSSProperties) => {
             return (
                 <FileTreeItem
                     key={item.name}
                     item={item}
                     depth={depth}
                     view={view}
+                    style={style}
                 />
             )
         },
@@ -22,7 +24,7 @@ export let FileTree = ({view}: {view: FSViewModel}) => {
         <div className="file-tree">
             <Virtualizer
                 items={virtualizer.items}
-                itemHeight={30} // TODO: update once I know the size
+                itemHeight={24}
                 renderItem={renderItem}
             />
         </div>
@@ -30,11 +32,16 @@ export let FileTree = ({view}: {view: FSViewModel}) => {
 }
 FileTree = observer(FileTree)
 
-let FileTreeItem = ({item, depth, view}: FSTreeItem & {view: FSViewModel}) => {
+let FileTreeItem = ({
+    item,
+    depth,
+    view,
+    style,
+}: FSTreeItem & {view: FSViewModel; style: React.CSSProperties}) => {
     return (
         <div
             role="treeitem"
-            style={{paddingLeft: depth * 1 + "rem"}}
+            style={{...style, paddingLeft: depth * 1 + "rem"}}
             // TODO
             aria-posinset={0}
             aria-selected={false}

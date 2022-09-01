@@ -1,0 +1,5 @@
+.file-tree {
+    position: relative;
+    width: 25%;
+    flex-shrink: 0;
+}

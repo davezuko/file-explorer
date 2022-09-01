@@ -5,21 +5,24 @@ import {FSItem, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
 
 export let DirectoryView = ({view}: {view: FSViewModel}) => {
-    const renderItem = useCallback((row: FSItem[]) => {
-        return (
-            <div key={row[0].name} style={{display: "flex"}}>
-                {row.map((item) => {
-                    return (
-                        <DirectoryViewItem
-                            key={item.name}
-                            item={item}
-                            view={view}
-                        />
-                    )
-                })}
-            </div>
-        )
-    }, [])
+    const renderItem = useCallback(
+        (row: FSItem[], style: React.CSSProperties) => {
+            return (
+                <div key={row[0].name} style={{display: "flex", ...style}}>
+                    {row.map((item) => {
+                        return (
+                            <DirectoryViewItem
+                                key={item.name}
+                                item={item}
+                                view={view}
+                            />
+                        )
+                    })}
+                </div>
+            )
+        },
+        [],
+    )
 
     const columns = 9 // TODO: compute based on available space
     const rows = useMemo(() => {
@@ -50,11 +53,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 }
             }}
         >
-            <Virtualizer
-                items={rows}
-                itemHeight={80} // TODO: update once I know the size
-                renderItem={renderItem}
-            />
+            <Virtualizer items={rows} itemHeight={24} renderItem={renderItem} />
         </div>
     )
 }
@@ -65,7 +64,10 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
     return (
         <div
             tabIndex={0}
-            style={{background: selected ? "#aaf" : "#fff", userSelect: "none"}}
+            style={{
+                background: selected ? "#aaf" : "#fff",
+                userSelect: "none",
+            }}
             onClick={(e) => {
                 e.stopPropagation()
                 view.selection.fromClickEvent(item, e.nativeEvent)
