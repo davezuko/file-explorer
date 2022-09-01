@@ -47,6 +47,12 @@ export class Directory {
         this.children.push(item)
         return item
     }
+
+    delete(items: Set<FSItem>) {
+        this.children = this.children.filter((child) => {
+            return !items.has(child)
+        })
+    }
 }
 
 export class FSViewModel {
@@ -76,6 +82,11 @@ export class FSViewModel {
     selected(item: FSItem) {
         return this.selection.has(item)
     }
+
+    deleteSelection() {
+        this.cwd.delete(this.selection.items)
+        this.selection = new Selection(this.cwd.children)
+    }
 }
 
 /**
@@ -92,40 +103,41 @@ export class FSViewModel {
  * accordingly.
  */
 class Selection<T> {
-    private selection: Set<T>
-    private items: T[]
     private last: T | null
+    items: Set<T>
+    source: T[]
 
-    constructor(items: T[] = []) {
-        this.selection = new Set()
-        this.items = items
+    constructor(source: T[] = []) {
+        this.items = new Set()
+        this.source = source
         this.last = null
-        makeAutoObservable<this, "selection" | "items" | "last">(this, {
-            selection: observable.shallow,
-            items: false,
+        makeAutoObservable<this, "items" | "last">(this, {
+            items: observable.shallow,
+            source: false,
             last: false,
         })
     }
 
     clear() {
         this.last = null
-        this.selection.clear()
+        this.items.clear()
     }
 
     has(item: T): boolean {
-        return this.selection.has(item)
+        return this.items.has(item)
     }
 
     add(item: T) {
         this.last = item
-        this.selection.add(item)
+        this.items.add(item)
     }
 
     delete(item: T) {
-        this.selection.delete(item)
+        this.items.delete(item)
     }
 
-    update(item: T, selected: boolean) {
+    toggle(item: T, selected?: boolean) {
+        selected = selected ?? !this.has(item)
         if (selected) {
             this.add(item)
         } else {
@@ -153,20 +165,19 @@ class Selection<T> {
         // items or range that actually got selected. I think that's a safer
         // API than forcing each caller to gracefully handle an error when
         // it's not as catastrophic as the earlier assertions.
-        end = Math.min(end, this.items.length - 1)
+        end = Math.min(end, this.source.length - 1)
         for (let i = start; i <= end; i++) {
-            this.update(this.items[i], selected)
+            this.toggle(this.source[i], selected)
         }
     }
 
     fromClickEvent(item: T, e: MouseEvent) {
-        const selected = this.has(item)
         if (e.shiftKey) {
-            const start = this.items.indexOf(item)
-            const end = this.items.indexOf(this.last!)
+            const start = this.source.indexOf(item)
+            const end = this.source.indexOf(this.last!)
             this.updateRange(start, end, true)
         } else if (e.ctrlKey) {
-            this.update(item, !selected)
+            this.toggle(item)
         } else {
             this.clear()
             this.add(item)

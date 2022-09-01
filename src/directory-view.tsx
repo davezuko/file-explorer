@@ -36,7 +36,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
             rows.push(row)
         }
         return rows
-    }, [columns])
+    }, [columns, view.cwd.children, view.cwd.children.length])
 
     return (
         <div
@@ -64,10 +64,16 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
     const selected = computed(() => view.selected(item)).get()
     return (
         <div
+            tabIndex={0}
             style={{background: selected ? "#aaf" : "#fff", userSelect: "none"}}
             onClick={(e) => {
                 e.stopPropagation()
                 view.selection.fromClickEvent(item, e.nativeEvent)
+            }}
+            onKeyDown={(e) => {
+                if (selected && e.ctrlKey && e.key === "Delete") {
+                    view.deleteSelection()
+                }
             }}
         >
             <span>{item.name}</span>
