@@ -1,3 +1,4 @@
+import "./main.css"
 import {createRoot} from "react-dom/client"
 import {Directory, File} from "./file-system"
 import {FileExplorer} from "./file-explorer"
