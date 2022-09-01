@@ -1,0 +1,36 @@
+.desktop {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+}
+
+.window {
+    position: absolute;
+    display: flex;
+    height: 568px;
+    width: 720px;
+    flex-direction: column;
+    padding: 2px;
+    border: 1px solid rgb(200, 200, 200);
+}
+
+.window-titlebar {
+    display: flex;
+    align-items: center;
+    padding: 0.15rem 0 0.15rem 0.5rem;
+    height: 1.75rem;
+    background: #000;
+    user-select: none;
+}
+
+.window-title {
+    font-weight: 600;
+}
+
+.window-body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    background: var(--window-bg);
+}
