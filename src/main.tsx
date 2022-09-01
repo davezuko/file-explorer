@@ -1,3 +1,4 @@
+import "preact/debug"
 import "./main.css"
 import {createRoot} from "react-dom/client"
 import {Directory} from "./file-system"
