@@ -1,3 +1,9 @@
 .file-explorer {
     display: flex;
+    flex-direction: column;
+}
+
+.file-explorer-body {
+    display: flex;
+    flex: 1;
 }

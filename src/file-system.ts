@@ -1,4 +1,4 @@
-import {makeAutoObservable, observable} from "mobx"
+import {makeAutoObservable, observable, runInAction} from "mobx"
 
 /**
  * FSItem represents all allowed items in a file system. It would be possible
@@ -230,4 +230,42 @@ export class FSTreeVirtualizer {
         walk(this.view.cwd)
         return items
     }
+}
+
+export const seedDirectory = (dir: Directory, count: number) => {
+    runInAction(() => {
+        {
+            let d = dir.add(new Directory("Directory 1"))
+            d.add(new File("File 1"))
+            d.add(new File("File 2"))
+            d.add(new File("File 3"))
+        }
+        {
+            let d = dir.add(new Directory("Directory 2"))
+            d.add(new File("File 1"))
+            d.add(new File("File 2"))
+            d.add(new File("File 3"))
+            {
+                let dd = d.add(new Directory("Directory 1"))
+                dd.add(new File("File 1"))
+                dd.add(new File("File 2"))
+                dd.add(new File("File 3"))
+            }
+            {
+                let dd = d.add(new Directory("Directory 2"))
+                dd.add(new File("File 1"))
+                dd.add(new File("File 2"))
+                dd.add(new File("File 3"))
+                {
+                    let ddd = dd.add(new Directory("Directory 1"))
+                    ddd.add(new File("File 1"))
+                    ddd.add(new File("File 2"))
+                    ddd.add(new File("File 3"))
+                }
+            }
+        }
+        for (let i = 1; i <= count; i++) {
+            dir.add(new File(`File ${i}`))
+        }
+    })
 }
