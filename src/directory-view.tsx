@@ -52,18 +52,11 @@ DirectoryView = observer(DirectoryView)
 
 let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
     const selected = computed(() => view.selected(item)).get()
-    console.log({selected})
     return (
         <div
-            style={{background: selected ? "#aaf" : "#fff"}}
+            style={{background: selected ? "#aaf" : "#fff", userSelect: "none"}}
             onClick={(e) => {
-                if (e.ctrlKey) {
-                    if (selected) {
-                        view.selection.delete(item)
-                    } else {
-                        view.selection.add(item)
-                    }
-                }
+                view.selection.fromClickEvent(item, e.nativeEvent)
             }}
         >
             <span>{item.name}</span>

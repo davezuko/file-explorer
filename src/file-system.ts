@@ -55,7 +55,7 @@ export class FSViewModel {
 
     constructor(dir: Directory) {
         this.cwd = dir
-        this.selection = new Selection()
+        this.selection = new Selection(this.cwd.children)
         makeAutoObservable(this, {
             cwd: observable.ref,
         })
@@ -93,15 +93,22 @@ export class FSViewModel {
  */
 class Selection<T> {
     private selection: Set<T>
+    private items: T[]
+    private last: T | null
 
-    constructor() {
+    constructor(items: T[] = []) {
         this.selection = new Set()
-        makeAutoObservable<this, "selection">(this, {
+        this.items = items
+        this.last = null
+        makeAutoObservable<this, "selection" | "items" | "last">(this, {
             selection: observable.shallow,
+            items: false,
+            last: false,
         })
     }
 
     clear() {
+        this.last = null
         this.selection.clear()
     }
 
@@ -110,10 +117,61 @@ class Selection<T> {
     }
 
     add(item: T) {
+        this.last = item
         this.selection.add(item)
     }
 
     delete(item: T) {
         this.selection.delete(item)
+    }
+
+    update(item: T, selected: boolean) {
+        if (selected) {
+            this.add(item)
+        } else {
+            this.delete(item)
+        }
+    }
+
+    updateRange(start: number, end: number, selected: boolean) {
+        if (start < 0) {
+            throw new Error(`start index must be >= 0, got: ${start}`)
+        }
+        if (end < 0) {
+            throw new Error(`end index must be >= 0, got: ${end}.`)
+        }
+
+        // Range is allowed to go backwards (e.g. 5 -> 0), but simplify
+        // our iteration by putting them in ascending order.
+        if (end < start) {
+            ;[start, end] = [end, start]
+        }
+
+        // We could throw if `end` exceeds the bounds of `items`, or we could
+        // select as many items as possible that fit the range. I've chosen the
+        // latter, and in the Real World would probably return the count of
+        // items or range that actually got selected. I think that's a safer
+        // API than forcing each caller to gracefully handle an error when
+        // it's not as catastrophic as the earlier assertions.
+        end = Math.min(end, this.items.length - 1)
+        for (let i = start; i <= end; i++) {
+            this.update(this.items[i], selected)
+        }
+    }
+
+    fromClickEvent(item: T, e: MouseEvent) {
+        e.preventDefault()
+
+        const selected = this.has(item)
+        if (e.shiftKey) {
+            const start = this.items.indexOf(item)
+            const end = this.items.indexOf(this.last!)
+            this.updateRange(start, end, true)
+        } else if (e.ctrlKey) {
+            this.update(item, !selected)
+        } else {
+            this.clear()
+            this.add(item)
+        }
     }
 }
