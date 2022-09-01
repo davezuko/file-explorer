@@ -160,8 +160,6 @@ class Selection<T> {
     }
 
     fromClickEvent(item: T, e: MouseEvent) {
-        e.preventDefault()
-
         const selected = this.has(item)
         if (e.shiftKey) {
             const start = this.items.indexOf(item)

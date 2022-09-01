@@ -39,7 +39,17 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
     }, [columns])
 
     return (
-        <div style={{flex: 1}}>
+        <div
+            style={{flex: 1}}
+            onClick={(e) => {
+                // the user can click on the canvas to clear the current
+                // selection. Do not clear the selection if a modifier key
+                // is pressed since that may just be a misclick.
+                if (!e.ctrlKey && !e.shiftKey) {
+                    view.selection.clear()
+                }
+            }}
+        >
             <Virtualizer
                 items={rows}
                 itemHeight={80} // TODO: update once I know the size
@@ -56,6 +66,7 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
         <div
             style={{background: selected ? "#aaf" : "#fff", userSelect: "none"}}
             onClick={(e) => {
+                e.stopPropagation()
                 view.selection.fromClickEvent(item, e.nativeEvent)
             }}
         >
