@@ -8,8 +8,6 @@
 .window {
     position: absolute;
     display: flex;
-    height: 568px;
-    width: 720px;
     flex-direction: column;
     padding: 2px;
     border: 1px solid rgb(200, 200, 200);
