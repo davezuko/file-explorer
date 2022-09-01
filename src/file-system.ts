@@ -58,13 +58,29 @@ export class Directory {
 export class FSViewModel {
     cwd: Directory
     selection: Selection<FSItem>
+    expandedDirs: Set<Directory>
 
     constructor(dir: Directory) {
         this.cwd = dir
         this.selection = new Selection(this.cwd.children)
+        this.expandedDirs = new Set()
         makeAutoObservable(this, {
             cwd: observable.ref,
+            expandedDirs: observable.shallow,
         })
+    }
+
+    expanded(item: Directory) {
+        return this.expandedDirs.has(item)
+    }
+
+    toggleExpanded(dir: Directory, expanded?: boolean) {
+        expanded = expanded ?? !this.expandedDirs.has(dir)
+        if (expanded) {
+            this.expandedDirs.add(dir)
+        } else {
+            this.expandedDirs.delete(dir)
+        }
     }
 
     createFile(name = "New file"): File {
@@ -182,5 +198,36 @@ class Selection<T> {
             this.clear()
             this.add(item)
         }
+    }
+}
+
+export interface FSTreeItem {
+    item: FSItem
+    depth: number
+}
+export class FSTreeVirtualizer {
+    private view: FSViewModel
+
+    constructor(view: FSViewModel) {
+        this.view = view
+        makeAutoObservable<this, "view">(this, {
+            view: false,
+        })
+    }
+
+    // TODO: this should either be an iterator or accept a start/end index so
+    // that we don't have to walk the whole tree when only a subset is needed.
+    get items(): FSTreeItem[] {
+        const items: FSTreeItem[] = []
+        const walk = (dir: Directory, depth = 0) => {
+            for (const item of dir.children) {
+                items.push({item, depth})
+                if (item.type === "directory" && this.view.expanded(item)) {
+                    walk(item, depth + 1)
+                }
+            }
+        }
+        walk(this.view.cwd)
+        return items
     }
 }
