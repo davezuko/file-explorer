@@ -38,18 +38,18 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
     return (
         <header>
             <HStack>
-                <Button text="new file" onClick={() => create("file")} />
-                <Button text="new directory" onClick={() => create("file")} />
+                <Button text="+ File" onClick={() => create("file")} />
+                <Button text="+ Folder" onClick={() => create("directory")} />
                 <Button
-                    text="+100"
+                    text="+ 100"
                     onClick={() => seedDirectory(view.cwd, 100)}
                 />
                 <Button
-                    text="+10,000"
+                    text="+ 10,000"
                     onClick={() => seedDirectory(view.cwd, 10_000)}
                 />
                 <Button
-                    text="help"
+                    text="Help"
                     onClick={() => win.openDialog("Help", <Help />)}
                 />
             </HStack>
