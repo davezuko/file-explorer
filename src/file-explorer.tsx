@@ -1,48 +1,67 @@
-import "./file-explorer.css"
 import {useEffect, useMemo, useRef, useState} from "react"
 import {observer} from "mobx-react-lite"
 import {FSItem, Directory, FSViewModel, seedDirectory} from "./file-system"
 import {FileTree} from "./file-tree"
 import {DirectoryView} from "./directory-view"
+import {Button, HStack, VStack} from "./primitives"
+import {useWindowContext, useWindowDetails, useWindowTitle} from "./desktop-sim"
 
 export let FileExplorer = ({root}: {root: Directory}) => {
     const view = useMemo(() => new FSViewModel(root), [root])
-    const [createDialog, setCreateDialog] = useState<FSItem["type"] | false>(
-        false,
-    )
+    const items = view.cwd.children.length
+    useWindowTitle("File Explorer", view.cwd.name)
+    useWindowDetails(`${items} ${items === 1 ? "item" : "items"}`)
     return (
-        <div className="file-explorer">
-            <header>
-                <button onClick={() => setCreateDialog("file")}>
-                    new file
-                </button>
-                <button onClick={() => setCreateDialog("directory")}>
-                    new directory
-                </button>
-                <button onClick={() => seedDirectory(root, 100)}>
-                    demo (100)
-                </button>
-                <button onClick={() => seedDirectory(root, 10_000)}>
-                    demo (10,000)
-                </button>
-            </header>
-            <div className="file-explorer-body">
+        <>
+            <FileExplorerToolbar view={view} />
+            <HStack flex={1}>
                 <FileTree view={view} />
                 <DirectoryView view={view} />
-            </div>
-            {createDialog && (
-                <CreateFSItemDialog
-                    initialType={createDialog}
-                    view={view}
-                    onClose={() => setCreateDialog(false)}
-                />
-            )}
-        </div>
+            </HStack>
+        </>
     )
 }
 FileExplorer = observer(FileExplorer)
 
-const CreateFSItemDialog = ({
+const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
+    const win = useWindowContext()
+    const create = (type: FSItem["type"]) => {
+        win.openDialog(
+            "Create new...",
+            <CreateItemForm
+                view={view}
+                initialType={type}
+                onClose={() => win.closeDialog()}
+            />,
+        )
+    }
+    return (
+        <header>
+            <HStack>
+                <Button text="new file" onClick={() => create("file")} />
+                <Button text="new directory" onClick={() => create("file")} />
+                <Button
+                    text="+100"
+                    onClick={() => seedDirectory(view.cwd, 100)}
+                />
+                <Button
+                    text="+10,000"
+                    onClick={() => seedDirectory(view.cwd, 10_000)}
+                />
+                <Button
+                    text="help"
+                    onClick={() => win.openDialog("Help", <Help />)}
+                />
+            </HStack>
+        </header>
+    )
+}
+
+const Help = () => {
+    return <div>TODO</div>
+}
+
+const CreateItemForm = ({
     initialType,
     onClose,
     view,
@@ -52,7 +71,6 @@ const CreateFSItemDialog = ({
     onClose(): void
 }) => {
     const inputRef = useRef<HTMLInputElement>(null!)
-    const formRef = useRef<HTMLFormElement>(null!)
     const mountedRef = useRef(false)
     const [name, setName] = useState("")
     const [type, setType] = useState<FSItem["type"]>(initialType)
@@ -92,41 +110,16 @@ const CreateFSItemDialog = ({
     }, [])
 
     return (
-        <div
-            style={{
-                position: "absolute",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                width: "100%",
-                background: "rgba(0, 0, 0, 0.25)",
-            }}
-            onClick={(e) => {
-                if (!formRef.current?.contains(e.target as any)) {
-                    onClose()
-                }
+        <form
+            onSubmit={(e) => {
+                e.preventDefault()
+                view.create(type, name)
+                onClose()
             }}
         >
-            <form
-                ref={formRef}
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: "1rem",
-                    background: "#fff",
-                    width: "75%",
-                    minWidth: "10rem",
-                    maxWidth: "20rem",
-                }}
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    view.create(type, name)
-                    onClose()
-                }}
-            >
+            <VStack gap={2}>
                 <label>
-                    Create new...
+                    Type
                     <select
                         name="type"
                         value={type}
@@ -153,9 +146,10 @@ const CreateFSItemDialog = ({
                         style={{display: "block", width: "100%"}}
                     />
                 </label>
-
-                <button type="submit">Create</button>
-            </form>
-        </div>
+                <Button type="submit" style={{marginTop: "0.5rem"}}>
+                    Create
+                </Button>
+            </VStack>
+        </form>
     )
 }

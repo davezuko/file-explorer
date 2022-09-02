@@ -1,14 +1,22 @@
+import "./directory-view.css"
 import {useCallback, useMemo} from "react"
 import {computed} from "mobx"
 import {observer} from "mobx-react-lite"
 import {FSItem, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
+import {cx, HStack, VStack} from "./primitives"
 
 export let DirectoryView = ({view}: {view: FSViewModel}) => {
     const renderItem = useCallback(
         (row: FSItem[], style: React.CSSProperties) => {
             return (
-                <div key={row[0].name} style={{display: "flex", ...style}}>
+                <HStack
+                    key={row[0].name}
+                    style={style}
+                    gap={0.75}
+                    className="directory-view-row"
+                    align="start"
+                >
                     {row.map((item) => {
                         return (
                             <DirectoryViewItem
@@ -18,7 +26,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                             />
                         )
                     })}
-                </div>
+                </HStack>
             )
         },
         [],
@@ -43,7 +51,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
 
     return (
         <div
-            style={{flex: 1}}
+            className="directory-view panel"
             onClick={(e) => {
                 // the user can click on the canvas to clear the current
                 // selection. Do not clear the selection if a modifier key
@@ -53,7 +61,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 }
             }}
         >
-            <Virtualizer items={rows} itemHeight={24} renderItem={renderItem} />
+            <Virtualizer items={rows} itemHeight={75} renderItem={renderItem} />
         </div>
     )
 }
@@ -62,12 +70,11 @@ DirectoryView = observer(DirectoryView)
 let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
     const selected = computed(() => view.selected(item)).get()
     return (
-        <div
-            tabIndex={0}
-            style={{
-                background: selected ? "#aaf" : "#fff",
-                userSelect: "none",
-            }}
+        <VStack
+            className={cx(
+                "directory-view-item selectable",
+                selected && "selected",
+            )}
             onClick={(e) => {
                 e.stopPropagation()
                 view.selection.fromClickEvent(item, e.nativeEvent)
@@ -77,9 +84,13 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
                     view.deleteSelection()
                 }
             }}
+            tabIndex={0}
         >
-            <span>{item.name}</span>
-        </div>
+            <img className="directory-view-item-image" />
+            <span className="directory-view-item-name truncate">
+                {item.name}
+            </span>
+        </VStack>
     )
 }
 DirectoryViewItem = observer(DirectoryViewItem)

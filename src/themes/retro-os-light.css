@@ -1,0 +1,33 @@
+[data-theme="retro-os-light"] {
+    --fg: #000;
+    --bg: #008080;
+
+    --desktop-toolbar-bg: #d4d0c8;
+
+    --window-bg: #d4d0c8;
+    --window-border: 1px solid rgb(200, 200, 200);
+    --window-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf,
+        inset -2px -2px #808080, inset 2px 2px #fff;
+    --window-titlebar-fg: #fff;
+    --window-titlebar-bg: linear-gradient(
+        90deg,
+        rgba(112, 33, 8, 1) 20%,
+        rgba(181, 137, 105, 1) 100%
+    );
+    --window-footer-bg: #dddad4;
+
+    --button-bg: #d4d0c8;
+    --button-fg: #000;
+    --button-bg-hover: #cbc7bd;
+    --button-bg-pressed: #c2beb2;
+    --button-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf,
+        inset -2px -2px #808080, inset 2px 2px #fff;
+
+    --panel-fg: #000;
+    --panel-bg: #fff;
+    --panel-shadow: 2px 2px 0px 1px rgba(0, 0, 0, 0.5) inset;
+
+    --selectable-bg-hover: #e5f3ff;
+    --selectable-bg-selected: #cce8ff;
+    --selectable-bg-border: #99d1ff;
+}

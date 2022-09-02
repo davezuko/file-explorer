@@ -3,3 +3,8 @@
     width: 25%;
     flex-shrink: 0;
 }
+
+.file-tree-item {
+    width: 100%;
+    padding-left: calc(var(--depth, 0) * 1rem);
+}

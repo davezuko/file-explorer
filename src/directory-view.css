@@ -1,0 +1,29 @@
+.directory-view {
+    flex: 1;
+    min-width: 0;
+}
+
+.directory-view-row {
+    height: 75px;
+    display: flex;
+}
+
+.directory-view-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 0 0 72px;
+    height: 72px;
+    overflow: hidden;
+}
+
+.directory-view-item-image {
+    height: 40px;
+    width: 40px;
+    align-self: center;
+}
+
+.directory-view-item-name {
+    text-align: center;
+    font-size: 0.85rem;
+}

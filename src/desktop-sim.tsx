@@ -1,28 +1,18 @@
 import "./desktop-sim.css"
-import {createContext, useEffect, useLayoutEffect, useRef} from "react"
-import {makeAutoObservable, observable} from "mobx"
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+} from "react"
+import {makeAutoObservable, observable, runInAction} from "mobx"
 import {observer} from "mobx-react-lite"
+import {Button, HStack, VStack} from "./primitives"
 
 const WINDOW_ASPECT_RATIO = 4 / 3
-const WINDOW_MIN_WIDTH = 480
-const WINDOW_MAX_WIDTH = 768
-
-export let Desktop = ({windows: wm}: {windows: WindowManager}) => {
-    return (
-        <div className="desktop">
-            <div className="desktop-body">
-                {wm.windows.map((win) => {
-                    return (
-                        <Window key={win.id} window={win}>
-                            {win.element}
-                        </Window>
-                    )
-                })}
-            </div>
-        </div>
-    )
-}
-Desktop = observer(Desktop)
+const WINDOW_MIN_WIDTH = 640
+const WINDOW_MAX_WIDTH = 1042
 
 export class WindowManager {
     lastId: number
@@ -50,47 +40,187 @@ class DesktopWindow {
     manager: WindowManager
     title: string
     element: React.ReactElement | null
+    details?: string | null
+    dialog?: {title: string; element: React.ReactElement} | null
 
     constructor(manager: WindowManager, id: number) {
         this.id = id
         this.manager = manager
         this.title = "New Window"
         this.element = null
+        this.dialog = null
+        this.details = null
         makeAutoObservable(this, {
             manager: false,
             element: observable.ref,
+            dialog: observable.ref,
         })
+    }
+
+    openDialog(title: string, element: React.ReactElement) {
+        this.dialog = {title, element}
+    }
+
+    closeDialog() {
+        this.dialog = null
     }
 }
 
 const WindowContext = createContext<DesktopWindow>(null!)
+export const useWindowContext = () => useContext(WindowContext)
+
+export let Desktop = ({windows: wm}: {windows: WindowManager}) => {
+    return (
+        <div className="desktop">
+            <div className="desktop-body">
+                {wm.windows.map((win) => {
+                    return <WindowObserver key={win.id} window={win} />
+                })}
+            </div>
+        </div>
+    )
+}
+Desktop = observer(Desktop)
+
+let WindowObserver = ({window: win}: {window: DesktopWindow}) => {
+    const {element, details, title, dialog} = win
+    return (
+        <WindowContext.Provider value={win}>
+            <Window title={title}>
+                <VStack flex={1} className="window-viewport">
+                    {element}
+                </VStack>
+                {details && (
+                    <footer className="window-footer">
+                        Details: {details}
+                    </footer>
+                )}
+                {dialog && (
+                    <Dialog
+                        title={dialog.title}
+                        onClose={() => win.closeDialog()}
+                    >
+                        {dialog.element}
+                    </Dialog>
+                )}
+            </Window>
+        </WindowContext.Provider>
+    )
+}
+WindowObserver = observer(WindowObserver)
 
 let Window = ({
-    window: win,
     children,
+    title,
+    onClose,
+    autoSize = true,
+    draggable = true,
+    canMinimize = true,
+    canMaximize = true,
 }: {
-    window: DesktopWindow
     children: React.ReactNode
+    autoSize?: boolean
+    draggable?: boolean
+    title?: string
+    onClose?(): void
+    canMinimize?: boolean
+    canMaximize?: boolean
 }) => {
     const ref = useRef<HTMLDivElement>(null!)
     const titlebarRef = useRef<HTMLElement>(null!)
-    useWindowBehavior(ref, titlebarRef)
+    useAutoWindowSize(ref, autoSize)
+    useMakeDraggable(ref, titlebarRef, draggable)
     return (
-        <WindowContext.Provider value={win}>
-            <div className="window" ref={ref}>
-                <header className="window-titlebar" ref={titlebarRef}>
-                    <span className="window-title">{win.title}</span>
-                </header>
-                <div className="window-body">{children}</div>
-            </div>
-        </WindowContext.Provider>
+        <div className="window" ref={ref}>
+            <header className="window-titlebar" ref={titlebarRef}>
+                <span className="window-title">{title}</span>
+                <HStack gap={0.25} className="window-buttons">
+                    {canMinimize && <Button title="inop">-</Button>}
+                    {canMaximize && <Button title="inop">+</Button>}
+                    <Button title="Close" onClick={onClose}>
+                        x
+                    </Button>
+                </HStack>
+            </header>
+            <VStack className="window-body">{children}</VStack>
+        </div>
     )
 }
 Window = observer(Window)
 
-const useWindowBehavior = (
+export const Dialog = ({
+    title,
+    onClose,
+    children,
+}: {
+    title: string
+    children: React.ReactNode
+    onClose(): void
+}) => {
+    const ref = useRef<HTMLDivElement>(null!)
+    return (
+        <div
+            ref={ref}
+            className="dialog"
+            onClick={(e) => {
+                if (!ref.current?.contains(e.target as any)) {
+                    onClose()
+                }
+            }}
+        >
+            <Window
+                title={title}
+                autoSize={false}
+                draggable={false}
+                canMaximize={false}
+                canMinimize={false}
+                onClose={onClose}
+            >
+                {children}
+            </Window>
+        </div>
+    )
+}
+
+export const useWindowDetails = (details: string | null) => {
+    const win = useWindowContext()
+    useEffect(() => {
+        runInAction(() => {
+            win.details = details
+        })
+    }, [win, details])
+}
+
+export const useWindowTitle = (app: string, title?: string) => {
+    const win = useWindowContext()
+    useEffect(() => {
+        runInAction(() => {
+            win.title = title ? `${app} - ${title}` : app
+        })
+    }, [win, title])
+}
+
+const useMakeDraggable = (
     ref: React.MutableRefObject<HTMLDivElement>,
-    titlebarRef: React.MutableRefObject<HTMLElement>,
+    draggableRef: React.MutableRefObject<HTMLElement>,
+    enabled: boolean,
+) => {
+    // The window can be moved by dragging its titlebar.
+    useDragListener(draggableRef, (e) => {
+        const elem = ref.current
+        if (!elem || !enabled) return
+
+        const rect = elem.getBoundingClientRect()
+        const dx = e.movementX
+        const dy = e.movementY
+        elem.style.left = rect.x + dx + "px"
+        elem.style.top = rect.y + dy + "px"
+    })
+}
+
+const useAutoWindowSize = (
+    ref: React.MutableRefObject<HTMLDivElement>,
+    enabled: boolean,
 ) => {
     // size this window based on the available space in the browser window,
     // preserving intended aspect ratio.
@@ -98,11 +228,11 @@ const useWindowBehavior = (
     // TODO: better initial positioning for tiny screens.
     useLayoutEffect(() => {
         const elem = ref.current
-        if (!elem) return
+        if (!elem || !enabled) return
 
         const container = document.body.getBoundingClientRect()
         const width = clamp(
-            Math.round(container.width * 0.5),
+            Math.round(container.width * 0.65),
             WINDOW_MIN_WIDTH,
             WINDOW_MAX_WIDTH,
         )
@@ -113,19 +243,7 @@ const useWindowBehavior = (
         elem.style.left = left + "px"
         elem.style.width = width + "px"
         elem.style.height = height + "px"
-    }, [ref, titlebarRef])
-
-    // The window can be moved by dragging its titlebar.
-    useDragListener(titlebarRef, (e) => {
-        const elem = ref.current
-        if (!elem) return
-
-        const rect = elem.getBoundingClientRect()
-        const dx = e.movementX
-        const dy = e.movementY
-        elem.style.left = rect.x + dx + "px"
-        elem.style.top = rect.y + dy + "px"
-    })
+    }, [ref, enabled])
 }
 
 /**
