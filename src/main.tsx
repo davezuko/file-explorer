@@ -1,5 +1,5 @@
 import "preact/debug"
-import "./main.css"
+import "./themes/retro-os-light.css"
 import {createRoot} from "react-dom/client"
 import {Directory} from "./file-system"
 import {FileExplorer} from "./file-explorer"
