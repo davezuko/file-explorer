@@ -52,7 +52,7 @@ let FileTreeItem = ({
                 }
             }}
         >
-            {item.name}
+            {item.type === "directory" ? "D" : "F"} {item.name}
         </div>
     )
 }

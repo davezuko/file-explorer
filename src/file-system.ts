@@ -83,16 +83,13 @@ export class FSViewModel {
         }
     }
 
-    createFile(name = "New file"): File {
-        const file = new File(name)
-        this.cwd.add(file)
-        return file
-    }
-
-    createDirectory(name = "New directory"): Directory {
-        const directory = new Directory(name)
-        this.cwd.add(directory)
-        return directory
+    create(type: FSItem["type"], name: string) {
+        name = name.trim()
+        if (!name) {
+            throw new Error("cannot create an item with an empty name")
+        }
+        const item = type === "file" ? new File(name) : new Directory(name)
+        return this.cwd.add(item)
     }
 
     selected(item: FSItem) {
@@ -102,6 +99,13 @@ export class FSViewModel {
     deleteSelection() {
         this.cwd.delete(this.selection.items)
         this.selection = new Selection(this.cwd.children)
+    }
+
+    // TODO: verify performance on large number of elements. May be faster
+    // to store cwd.children in sorted order and binary search to see if
+    // an item exists with this name.
+    isNameAvailable(name: string): boolean {
+        return !this.cwd.children.find((item) => item.name === name)
     }
 }
 
