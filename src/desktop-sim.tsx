@@ -263,7 +263,11 @@ export const useDragListener = (
     useEffect(() => {
         const element = ref.current
         let mousedown = false
-        const handleMouseDown = () => {
+        const handleMouseDown = (e: MouseEvent) => {
+            // Ignore mousedown events on interactive elements.
+            if ((e.target as HTMLElement).tagName === "BUTTON") {
+                return
+            }
             mousedown = true
         }
         const handleMouseUp = () => {
