@@ -163,7 +163,8 @@ export const Dialog = ({
             ref={ref}
             className="dialog"
             onClick={(e) => {
-                if (!ref.current?.contains(e.target as any)) {
+                // Close the dialog if the user clicks on the background mask.
+                if (ref.current === e.target) {
                     onClose()
                 }
             }}
