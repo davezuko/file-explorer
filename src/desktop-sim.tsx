@@ -158,6 +158,18 @@ export const Dialog = ({
     onClose(): void
 }) => {
     const ref = useRef<HTMLDivElement>(null!)
+    useEffect(() => {
+        const handleKeydown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                onClose()
+            }
+        }
+        document.addEventListener("keydown", handleKeydown)
+        return () => {
+            document.removeEventListener("keydown", handleKeydown)
+        }
+    }, [onClose])
+
     return (
         <div
             ref={ref}

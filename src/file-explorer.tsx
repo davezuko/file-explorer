@@ -98,16 +98,7 @@ const CreateItemForm = ({
     useEffect(() => {
         mountedRef.current = true
         inputRef.current.focus()
-        const handleKeydown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                onClose()
-            }
-        }
-        document.addEventListener("keydown", handleKeydown)
-        return () => {
-            document.removeEventListener("keydown", handleKeydown)
-        }
-    }, [])
+    }, [mountedRef])
 
     return (
         <form
