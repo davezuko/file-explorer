@@ -31,7 +31,10 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
             <CreateItemForm
                 view={view}
                 initialType={type}
-                onClose={() => win.closeDialog()}
+                onSubmit={(item) => {
+                    view.cwd.add(item)
+                    win.closeDialog()
+                }}
             />,
         )
     }
@@ -62,13 +65,13 @@ const Help = () => {
 }
 
 const CreateItemForm = ({
-    initialType,
-    onClose,
     view,
+    initialType = "file",
+    onSubmit,
 }: {
-    initialType: FSItem["type"]
     view: FSViewModel
-    onClose(): void
+    initialType?: FSItem["type"]
+    onSubmit(item: FSItem): void
 }) => {
     const inputRef = useRef<HTMLInputElement>(null!)
     const mountedRef = useRef(false)
@@ -104,8 +107,7 @@ const CreateItemForm = ({
         <form
             onSubmit={(e) => {
                 e.preventDefault()
-                view.create(type, name)
-                onClose()
+                onSubmit(view.create(type, name))
             }}
         >
             <VStack gap={2}>

@@ -83,13 +83,12 @@ export class FSViewModel {
         }
     }
 
-    create(type: FSItem["type"], name: string) {
+    create(type: FSItem["type"], name: string): FSItem {
         name = name.trim()
         if (!name) {
             throw new Error("cannot create an item with an empty name")
         }
-        const item = type === "file" ? new File(name) : new Directory(name)
-        return this.cwd.add(item)
+        return type === "file" ? new File(name) : new Directory(name)
     }
 
     selected(item: FSItem) {
