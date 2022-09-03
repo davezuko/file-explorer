@@ -24,7 +24,7 @@ export let FileExplorer = ({root}: {root: Directory}) => {
 FileExplorer = observer(FileExplorer)
 
 const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
-    const win = useWindowContext()
+    const win = useWindowContext()!
     const create = (type: FSItem["type"]) => {
         win.openDialog(
             "Create new...",
@@ -32,7 +32,24 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
                 view={view}
                 initialType={type}
                 onSubmit={(item) => {
-                    view.cwd.add(item)
+                    // Spec: "The current selected directory is the parent" when
+                    // creating a new file/directory. This is a bit awkward since
+                    // the file tree supports multi-selection (not part of the
+                    // base spec), so compromise by:
+                    //
+                    // 1. If only one item is selected and it's a directory, use
+                    //    that as the parent.
+                    // 2. Otherwise, use the cwd.
+                    //
+                    // TODO: the best solution would be to make the parent
+                    // editable in the creation dialog.
+                    const parent =
+                        view.selection.size === 1 &&
+                        view.selection.latest?.type === "directory"
+                            ? view.selection.latest
+                            : view.cwd
+
+                    parent.add(item)
                     win.closeDialog()
                 }}
             />,

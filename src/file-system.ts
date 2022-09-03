@@ -10,13 +10,11 @@ export type FSItem = File | Directory
 
 export class File {
     name: string
-    type: "file"
-    parent: Directory | null
+    type = "file" as const
+    parent: Directory | null = null
 
     constructor(name: string) {
         this.name = name
-        this.type = "file"
-        this.parent = null
         makeAutoObservable(this, {
             type: false,
             parent: observable.ref,
@@ -26,15 +24,12 @@ export class File {
 
 export class Directory {
     name: string
-    type: "directory"
-    parent: Directory | null
-    children: FSItem[]
+    type = "directory" as const
+    parent: Directory | null = null
+    children: FSItem[] = []
 
     constructor(name: string) {
         this.name = name
-        this.type = "directory"
-        this.children = []
-        this.parent = null
         makeAutoObservable(this, {
             type: false,
             parent: observable.ref,
@@ -58,12 +53,11 @@ export class Directory {
 export class FSViewModel {
     cwd: Directory
     selection: Selection<FSItem>
-    expandedDirs: Set<Directory>
+    expandedDirs: Set<Directory> = new Set()
 
     constructor(dir: Directory) {
         this.cwd = dir
         this.selection = new Selection(this.cwd.children)
-        this.expandedDirs = new Set()
         makeAutoObservable(this, {
             cwd: observable.ref,
             expandedDirs: observable.shallow,
@@ -124,23 +118,25 @@ export class FSViewModel {
  * accordingly.
  */
 class Selection<T> {
-    private last: T | null
-    items: Set<T>
+    latest: T | null = null
+    items: Set<T> = new Set()
     source: T[]
 
     constructor(source: T[] = []) {
-        this.items = new Set()
         this.source = source
-        this.last = null
-        makeAutoObservable<this, "items" | "last">(this, {
+        makeAutoObservable(this, {
             items: observable.shallow,
             source: false,
-            last: false,
+            latest: false,
         })
     }
 
+    get size() {
+        return this.items.size
+    }
+
     clear() {
-        this.last = null
+        this.latest = null
         this.items.clear()
     }
 
@@ -149,7 +145,7 @@ class Selection<T> {
     }
 
     add(item: T) {
-        this.last = item
+        this.latest = item
         this.items.add(item)
     }
 
@@ -195,7 +191,7 @@ class Selection<T> {
     fromClickEvent(item: T, e: MouseEvent) {
         if (e.shiftKey) {
             const start = this.source.indexOf(item)
-            const end = this.source.indexOf(this.last!)
+            const end = this.source.indexOf(this.latest!)
             this.updateRange(start, end, true)
         } else if (e.ctrlKey) {
             this.toggle(item)
