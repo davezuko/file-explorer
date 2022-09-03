@@ -8,3 +8,23 @@
     width: 100%;
     padding-left: calc(var(--depth, 0) * 1rem);
 }
+
+.file-tree-item::before {
+    content: "";
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background: #ccc;
+}
+
+.file-tree-item[aria-level="0"]::before {
+    display: none;
+}
+
+.file-tree-item-prefix {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}

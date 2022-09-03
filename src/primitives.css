@@ -17,14 +17,6 @@
     user-select: none;
 }
 
-.button:focus {
-    outline: none;
-}
-
-.button:focus-visible {
-    outline: 1px solid #000;
-}
-
 .button:hover,
 .button:focus-visible {
     background: var(--button-bg-hover);
@@ -76,7 +68,6 @@ select {
 
 .selectable {
     user-select: none;
-    outline: none;
     border: 1px solid transparent;
 }
 

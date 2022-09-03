@@ -1,6 +1,5 @@
 import "./directory-view.css"
 import {useCallback, useMemo} from "react"
-import {computed} from "mobx"
 import {observer} from "mobx-react-lite"
 import {FSItem, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
@@ -68,7 +67,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
 DirectoryView = observer(DirectoryView)
 
 let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
-    const selected = computed(() => view.selected(item)).get()
+    const selected = view.selected(item)
     return (
         <VStack
             className={cx(

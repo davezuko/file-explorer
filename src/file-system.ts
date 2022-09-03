@@ -1,4 +1,4 @@
-import {makeAutoObservable, observable, runInAction} from "mobx"
+import {computed, makeAutoObservable, observable, runInAction} from "mobx"
 
 /**
  * FSItem represents all allowed items in a file system. It would be possible
@@ -70,8 +70,10 @@ export class FSViewModel {
         })
     }
 
-    expanded(item: Directory) {
-        return this.expandedDirs.has(item)
+    expanded(item: FSItem): boolean {
+        return computed(() => {
+            return item.type === "directory" && this.expandedDirs.has(item)
+        }).get()
     }
 
     toggleExpanded(dir: Directory, expanded?: boolean) {
@@ -92,7 +94,7 @@ export class FSViewModel {
     }
 
     selected(item: FSItem) {
-        return this.selection.has(item)
+        return computed(() => this.selection.has(item)).get()
     }
 
     deleteSelection() {

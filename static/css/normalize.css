@@ -319,16 +319,6 @@ button {
     background-image: none;
 }
 
-/**
- * Work around a Firefox/IE bug where the transparent `button` background
- * results in a loss of the default `button` focus styles.
- */
-
-button:focus {
-    outline: 1px dotted;
-    outline: 5px auto -webkit-focus-ring-color;
-}
-
 fieldset {
     margin: 0;
     padding: 0;
@@ -529,4 +519,15 @@ img,
 video {
     max-width: 100%;
     height: auto;
+}
+
+/**
+ * Sane defaults for focus rings.
+ */
+button:focus {
+    outline: none;
+}
+*:focus-visible,
+button:focus-visible {
+    outline: var(--focus-ring, 1px solid var(--focus-ring-color, #000));
 }
