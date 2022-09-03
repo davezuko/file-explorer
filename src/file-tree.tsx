@@ -8,16 +8,8 @@ import {cx} from "./primitives"
 export let FileTree = ({view}: {view: FSViewModel}) => {
     const virtualizer = useMemo(() => new FSTreeVirtualizer(view), [view])
     const renderItem = useCallback(
-        ({item, depth}: FSTreeItem, style: React.CSSProperties) => {
-            return (
-                <FileTreeItem
-                    key={item.path}
-                    item={item}
-                    depth={depth}
-                    view={view}
-                    style={style}
-                />
-            )
+        (item: FSTreeItem, style: React.CSSProperties) => {
+            return <FileTreeItem {...item} view={view} style={style} />
         },
         [view],
     )
@@ -36,6 +28,8 @@ FileTree = observer(FileTree)
 let FileTreeItem = ({
     item,
     depth,
+    setSize,
+    posInSet,
     view,
     style,
 }: FSTreeItem & {view: FSViewModel; style: React.CSSProperties}) => {
@@ -65,10 +59,14 @@ let FileTreeItem = ({
             role="treeitem"
             style={{...style, "--depth": depth} as React.CSSProperties}
             tabIndex={0}
-            // TODO
-            aria-posinset={0}
-            aria-selected={false}
-            aria-level={0}
+            aria-label={item.name}
+            aria-setsize={setSize}
+            aria-posinset={posInSet}
+            aria-selected={selected}
+            aria-level={depth + 1}
+            {...(item.type === "directory" && {
+                "aria-expanded": expanded,
+            })}
             onClick={(e) => {
                 view.selection.fromClickEvent(
                     view.cwd.children,
