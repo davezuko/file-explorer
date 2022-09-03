@@ -6,7 +6,7 @@ import {FileExplorer} from "./file-explorer"
 import {Desktop, WindowManager} from "./desktop-sim"
 
 const main = () => {
-    const dir = new Directory("root")
+    const dir = new Directory("")
     const wm = new WindowManager()
     wm.createWindow(<FileExplorer root={dir} />)
 

@@ -11,7 +11,7 @@ export let FileTree = ({view}: {view: FSViewModel}) => {
         ({item, depth}: FSTreeItem, style: React.CSSProperties) => {
             return (
                 <FileTreeItem
-                    key={item.name}
+                    key={item.path}
                     item={item}
                     depth={depth}
                     view={view}

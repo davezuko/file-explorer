@@ -20,6 +20,10 @@ export class File {
             parent: observable.ref,
         })
     }
+
+    get path() {
+        return filepath(this)
+    }
 }
 
 export class Directory {
@@ -35,6 +39,10 @@ export class Directory {
             parent: observable.ref,
             _children: observable.shallow,
         })
+    }
+
+    get path() {
+        return filepath(this)
     }
 
     add<T extends FSItem>(item: T): T {
@@ -62,6 +70,18 @@ export class Directory {
             return !items.has(child)
         })
     }
+}
+
+/**
+ * Returns an FSItem's absolute filepath, e.g. "/foo/bar/baz/qux.txt"
+ */
+const filepath = (item: FSItem): string => {
+    let parts: string[] = []
+    do {
+        parts.unshift(item.name)
+        item = item.parent!
+    } while (item)
+    return parts.join("/")
 }
 
 export class FSViewModel {
