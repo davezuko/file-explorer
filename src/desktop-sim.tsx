@@ -26,6 +26,10 @@ export class WindowManager {
         })
     }
 
+    close(win: DesktopWindow) {
+        this.windows = this.windows.filter((w) => w !== win)
+    }
+
     createWindow(element: React.ReactElement | null = null): DesktopWindow {
         const w = new DesktopWindow(this, this.lastId++)
         w.element = element
@@ -43,14 +47,18 @@ class DesktopWindow {
     dialog?: {title: string; element: React.ReactElement} | null = null
 
     constructor(manager: WindowManager, id: number) {
-        this.id = id
         this.manager = manager
+        this.id = id
         makeAutoObservable<this, "manager">(this, {
             id: false,
             manager: false,
             element: observable.ref,
             dialog: observable.ref,
         })
+    }
+
+    close() {
+        this.manager.close(this)
     }
 
     openDialog(title: string, element: React.ReactElement) {
@@ -130,7 +138,7 @@ let WindowObserver = ({window: win}: {window: DesktopWindow}) => {
     const {element, details, title, dialog} = win
     return (
         <WindowContext.Provider value={win}>
-            <Window title={title}>
+            <Window title={title} onClose={() => win.close()}>
                 <VStack flex={1} className="window-viewport">
                     {element}
                 </VStack>
