@@ -76,7 +76,11 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
             )}
             onClick={(e) => {
                 e.stopPropagation()
-                view.selection.fromClickEvent(item, e.nativeEvent)
+                view.selection.fromClickEvent(
+                    view.cwd.children,
+                    item,
+                    e.nativeEvent,
+                )
             }}
             onKeyDown={(e) => {
                 if (selected && e.ctrlKey && e.key === "Delete") {

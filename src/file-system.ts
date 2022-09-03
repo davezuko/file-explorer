@@ -23,28 +23,42 @@ export class File {
 }
 
 export class Directory {
+    private _children: FSItem[] = []
     name: string
     type = "directory" as const
     parent: Directory | null = null
-    children: FSItem[] = []
 
     constructor(name: string) {
         this.name = name
-        makeAutoObservable(this, {
+        makeAutoObservable<this, "_children">(this, {
             type: false,
             parent: observable.ref,
-            children: observable.shallow,
+            _children: observable.shallow,
         })
     }
 
     add<T extends FSItem>(item: T): T {
         item.parent = this
-        this.children.push(item)
+        this._children.push(item)
         return item
     }
 
+    // TODO: sort items as they are added to the list. I've skipped that for
+    // now since this getter returns a cached value until children changes,
+    // which yields acceptable performance. A better approach might be one of:
+    //
+    // a. implement binary search insertion, since items are sorted.
+    // b. make users call .sort() when they are done manipulating the list, since
+    //    we don't want to continually resort if items are added in bulk.
+    // c. queue inserted items and only sort once .children is requested.
+    get children() {
+        return this._children
+            .slice()
+            .sort((a, b) => a.name.localeCompare(b.name))
+    }
+
     delete(items: Set<FSItem>) {
-        this.children = this.children.filter((child) => {
+        this._children = this._children.filter((child) => {
             return !items.has(child)
         })
     }
@@ -162,7 +176,7 @@ class Selection<T> {
         }
     }
 
-    updateRange(start: number, end: number, selected: boolean) {
+    updateRange(items: T[], start: number, end: number, selected: boolean) {
         if (start < 0) {
             throw new Error(`start index must be >= 0, got: ${start}`)
         }
@@ -182,17 +196,17 @@ class Selection<T> {
         // items or range that actually got selected. I think that's a safer
         // API than forcing each caller to gracefully handle an error when
         // it's not as catastrophic as the earlier assertions.
-        end = Math.min(end, this.source.length - 1)
+        end = Math.min(end, items.length - 1)
         for (let i = start; i <= end; i++) {
-            this.toggle(this.source[i], selected)
+            this.toggle(items[i], selected)
         }
     }
 
-    fromClickEvent(item: T, e: MouseEvent) {
+    fromClickEvent(items: T[], item: T, e: MouseEvent) {
         if (e.shiftKey) {
-            const start = this.source.indexOf(item)
-            const end = this.source.indexOf(this.latest!)
-            this.updateRange(start, end, true)
+            const start = items.indexOf(item)
+            const end = items.indexOf(this.latest!)
+            this.updateRange(items, start, end, true)
         } else if (e.ctrlKey) {
             this.toggle(item)
         } else {

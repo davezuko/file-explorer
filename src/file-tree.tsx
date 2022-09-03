@@ -70,7 +70,11 @@ let FileTreeItem = ({
             aria-selected={false}
             aria-level={0}
             onClick={(e) => {
-                view.selection.fromClickEvent(item, e.nativeEvent)
+                view.selection.fromClickEvent(
+                    view.cwd.children,
+                    item,
+                    e.nativeEvent,
+                )
             }}
         >
             {prefix()}
