@@ -1,6 +1,7 @@
 import "./desktop-sim.css"
 import {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useLayoutEffect,
@@ -15,13 +16,11 @@ const WINDOW_MIN_WIDTH = 640
 const WINDOW_MAX_WIDTH = 1042
 
 export class WindowManager {
-    lastId: number
-    windows: DesktopWindow[]
+    private lastId = 1
+    windows: DesktopWindow[] = []
 
     constructor() {
-        this.lastId = 1
-        this.windows = []
-        makeAutoObservable(this, {
+        makeAutoObservable<this, "lastId">(this, {
             lastId: false,
             windows: observable.shallow,
         })
@@ -36,21 +35,18 @@ export class WindowManager {
 }
 
 class DesktopWindow {
+    private manager: WindowManager
     id: number
-    manager: WindowManager
-    title: string
-    element: React.ReactElement | null
-    details?: string | null
-    dialog?: {title: string; element: React.ReactElement} | null
+    title = "New Window"
+    element: React.ReactElement | null = null
+    details?: string | null = null
+    dialog?: {title: string; element: React.ReactElement} | null = null
 
     constructor(manager: WindowManager, id: number) {
         this.id = id
         this.manager = manager
-        this.title = "New Window"
-        this.element = null
-        this.dialog = null
-        this.details = null
-        makeAutoObservable(this, {
+        makeAutoObservable<this, "manager">(this, {
+            id: false,
             manager: false,
             element: observable.ref,
             dialog: observable.ref,
@@ -66,9 +62,9 @@ class DesktopWindow {
     }
 }
 
-const WindowContext = createContext<DesktopWindow>(null!)
-export const useWindowContext = () => useContext(WindowContext)
-
+/**
+ * Renders a simulated desktop and its active windows.
+ */
 export let Desktop = ({windows: wm}: {windows: WindowManager}) => {
     return (
         <div className="desktop">
@@ -82,6 +78,54 @@ export let Desktop = ({windows: wm}: {windows: WindowManager}) => {
 }
 Desktop = observer(Desktop)
 
+/**
+ * Renders a simulated desktop window.
+ */
+const Window = ({
+    children,
+    title,
+    onClose,
+    autoSize = true,
+    draggable = true,
+    canMinimize = true,
+    canMaximize = true,
+}: {
+    children: React.ReactNode
+    autoSize?: boolean
+    draggable?: boolean
+    title?: string
+    onClose?(): void
+    canMinimize?: boolean
+    canMaximize?: boolean
+}) => {
+    const ref = useRef<HTMLDivElement>(null!)
+    const titlebarRef = useRef<HTMLElement>(null!)
+    useAutoWindowSize(ref, autoSize)
+    useDraggable(ref, titlebarRef, draggable)
+    return (
+        <div className="window" ref={ref}>
+            <header className="window-titlebar" ref={titlebarRef}>
+                <span className="window-title">{title}</span>
+                <HStack gap={0.25} className="window-buttons">
+                    {canMinimize && <Button title="inop">-</Button>}
+                    {canMaximize && <Button title="inop">+</Button>}
+                    <Button title="Close" onClick={onClose}>
+                        x
+                    </Button>
+                </HStack>
+            </header>
+            <VStack className="window-body">{children}</VStack>
+        </div>
+    )
+}
+
+const WindowContext = createContext<DesktopWindow | null>(null)
+export const useWindowContext = () => useContext(WindowContext)
+
+/**
+ * Wrapper around Window that observes changes to window state, whereas Window
+ * is just a 'dumb' renderer that's reused in different ways.
+ */
 let WindowObserver = ({window: win}: {window: DesktopWindow}) => {
     const {element, details, title, dialog} = win
     return (
@@ -109,45 +153,11 @@ let WindowObserver = ({window: win}: {window: DesktopWindow}) => {
 }
 WindowObserver = observer(WindowObserver)
 
-let Window = ({
-    children,
-    title,
-    onClose,
-    autoSize = true,
-    draggable = true,
-    canMinimize = true,
-    canMaximize = true,
-}: {
-    children: React.ReactNode
-    autoSize?: boolean
-    draggable?: boolean
-    title?: string
-    onClose?(): void
-    canMinimize?: boolean
-    canMaximize?: boolean
-}) => {
-    const ref = useRef<HTMLDivElement>(null!)
-    const titlebarRef = useRef<HTMLElement>(null!)
-    useAutoWindowSize(ref, autoSize)
-    useMakeDraggable(ref, titlebarRef, draggable)
-    return (
-        <div className="window" ref={ref}>
-            <header className="window-titlebar" ref={titlebarRef}>
-                <span className="window-title">{title}</span>
-                <HStack gap={0.25} className="window-buttons">
-                    {canMinimize && <Button title="inop">-</Button>}
-                    {canMaximize && <Button title="inop">+</Button>}
-                    <Button title="Close" onClick={onClose}>
-                        x
-                    </Button>
-                </HStack>
-            </header>
-            <VStack className="window-body">{children}</VStack>
-        </div>
-    )
-}
-Window = observer(Window)
-
+/**
+ * Renders a dialog (modal) window, masking the content behind it until closed.
+ * The dialog can be closed by clicking outside of its content or by pressing
+ * <Escape>.
+ */
 export const Dialog = ({
     title,
     onClose,
@@ -169,14 +179,13 @@ export const Dialog = ({
             document.removeEventListener("keydown", handleKeydown)
         }
     }, [onClose])
-
     return (
         <div
             ref={ref}
             className="dialog"
             onClick={(e) => {
                 // Close the dialog if the user clicks on the background mask.
-                if (ref.current === e.target) {
+                if (e.target === ref.current) {
                     onClose()
                 }
             }}
@@ -195,50 +204,65 @@ export const Dialog = ({
     )
 }
 
-export const useWindowDetails = (details: string | null) => {
-    const win = useWindowContext()
-    useEffect(() => {
-        runInAction(() => {
-            win.details = details
-        })
-    }, [win, details])
-}
-
+/**
+ * Sets the window details string in the host window, if it exists.
+ */
 export const useWindowTitle = (app: string, title?: string) => {
     const win = useWindowContext()
     useEffect(() => {
+        if (!win) return
         runInAction(() => {
             win.title = title ? `${app} - ${title}` : app
         })
     }, [win, title])
 }
 
-const useMakeDraggable = (
+/**
+ * Sets the title in the host window, if it exists.
+ */
+export const useWindowDetails = (details: string | null) => {
+    const win = useWindowContext()
+    useEffect(() => {
+        if (!win) return
+        runInAction(() => {
+            win.details = details
+        })
+    }, [win, details])
+}
+
+/**
+ * Moves ref.current when draggableRef.current is dragged.
+ */
+const useDraggable = (
     ref: React.MutableRefObject<HTMLDivElement>,
     draggableRef: React.MutableRefObject<HTMLElement>,
     enabled: boolean,
 ) => {
-    // The window can be moved by dragging its titlebar.
-    useDragListener(draggableRef, (e) => {
-        const elem = ref.current
-        if (!elem || !enabled) return
-
-        const rect = elem.getBoundingClientRect()
-        const dx = e.movementX
-        const dy = e.movementY
-        elem.style.left = rect.x + dx + "px"
-        elem.style.top = rect.y + dy + "px"
-    })
+    const handleDrag = useCallback(
+        (e: MouseEvent) => {
+            const elem = ref.current
+            const rect = elem.getBoundingClientRect()
+            const dx = e.movementX
+            const dy = e.movementY
+            elem.style.left = rect.x + dx + "px"
+            elem.style.top = rect.y + dy + "px"
+        },
+        [ref],
+    )
+    useDragListener(draggableRef, handleDrag, enabled)
 }
 
+/**
+ * Resizes ref.current based on the avaialble space in the browser window,
+ * preserving the configured aspect ratio.
+ *
+ * TODO: resize if necessary when the browser window resizes.
+ * TODO: better initial positioning for tiny screens.
+ */
 const useAutoWindowSize = (
     ref: React.MutableRefObject<HTMLDivElement>,
     enabled: boolean,
 ) => {
-    // size this window based on the available space in the browser window,
-    // preserving intended aspect ratio.
-    // TODO: resize if necessary when the browser window resizes.
-    // TODO: better initial positioning for tiny screens.
     useLayoutEffect(() => {
         const elem = ref.current
         if (!elem || !enabled) return
@@ -260,48 +284,54 @@ const useAutoWindowSize = (
 }
 
 /**
- * Reports mouse move events when the user is dragging the target element.
- * Accepts a callback rather than returning a value to reduce re-renders
- * in the calling component. Expects the ref's interior value to be stable.
+ * Reports mouse move events when user drags the target element. Accepts a
+ * callback rather than returning a value to reduce re-renders in the calling
+ * component. Expects the ref's interior value to be stable.
  */
 export const useDragListener = (
     ref: React.MutableRefObject<HTMLElement>,
     onMouseMove: (e: MouseEvent) => void,
+    enabled: boolean,
 ) => {
-    // Avoid thrashing the document with add/remove event listeners just
-    // because the callback changed.
-    const callback = useRef<typeof onMouseMove>(onMouseMove)
-    callback.current = onMouseMove
     useEffect(() => {
         const element = ref.current
-        let mousedown = false
+        if (!element || !enabled) return
+
+        let shouldReportDrag = false
+
         const handleMouseDown = (e: MouseEvent) => {
-            // Ignore mousedown events on interactive elements.
+            // Ignore events on interactive elements.
             if ((e.target as HTMLElement).tagName === "BUTTON") {
                 return
             }
-            mousedown = true
+            shouldReportDrag = true
         }
+
         const handleMouseUp = () => {
-            mousedown = false
+            shouldReportDrag = false
         }
+
         const handleMouseMove = (e: MouseEvent) => {
-            if (mousedown) {
-                e.preventDefault()
-                callback.current(e)
+            if (shouldReportDrag) {
+                onMouseMove(e)
             }
         }
+
         element.addEventListener("mousedown", handleMouseDown, true)
         document.addEventListener("mouseup", handleMouseUp, true)
         document.addEventListener("mousemove", handleMouseMove, true)
         return () => {
             element.removeEventListener("mousedown", handleMouseDown)
             document.removeEventListener("mouseup", handleMouseUp)
-            document.removeEventListener("mousemove", handleMouseMove)
+            document.removeEventListener("mousemove", onMouseMove)
         }
-    }, [ref])
+    }, [ref, enabled, onMouseMove])
 }
 
-const clamp = (value: number, min: number, max: number) => {
+/**
+ * Returns value bounded by min and max. If smaller than min, returns min.
+ * If larger than max, returns max.
+ */
+const clamp = (value: number, min: number, max: number): number => {
     return Math.min(Math.max(value, min), max)
 }
