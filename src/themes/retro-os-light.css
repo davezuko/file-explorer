@@ -30,4 +30,7 @@
     --selectable-bg-hover: #e5f3ff;
     --selectable-bg-selected: #cce8ff;
     --selectable-bg-border: #99d1ff;
+
+    font-family: "leviwindows";
+    letter-spacing: 1px;
 }

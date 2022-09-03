@@ -3,7 +3,7 @@ import {useCallback, useMemo} from "react"
 import {observer} from "mobx-react-lite"
 import {FSTreeItem, FSTreeVirtualizer, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
-import {cx} from "./primitives"
+import {cx, HStack} from "./primitives"
 
 export let FileTree = ({view}: {view: FSViewModel}) => {
     const virtualizer = useMemo(() => new FSTreeVirtualizer(view), [view])
@@ -37,7 +37,13 @@ let FileTreeItem = ({
     const expanded = view.expanded(item)
     const prefix = () => {
         if (item.type === "file") {
-            return null
+            return (
+                <img
+                    className="file-tree-item-prefix"
+                    style={{padding: "2px"}}
+                    src="/img/icon-file-txt.png"
+                />
+            )
         }
         return (
             <button
@@ -54,7 +60,8 @@ let FileTreeItem = ({
     }
 
     return (
-        <div
+        <HStack
+            align="center"
             className={cx("file-tree-item selectable", selected && "selected")}
             role="treeitem"
             style={{...style, "--depth": depth} as React.CSSProperties}
@@ -77,7 +84,7 @@ let FileTreeItem = ({
         >
             {prefix()}
             {item.name}
-        </div>
+        </HStack>
     )
 }
 FileTreeItem = observer(FileTreeItem)

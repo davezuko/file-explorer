@@ -6,25 +6,11 @@
 
 .file-tree-item {
     width: 100%;
-    padding-left: calc(var(--depth, 0) * 1rem);
-}
-
-.file-tree-item::before {
-    content: "";
-    position: absolute;
-    width: 1px;
-    height: 100%;
-    background: #ccc;
-}
-
-.file-tree-item[aria-level="0"]::before {
-    display: none;
+    padding-left: calc(0.25rem + var(--depth, 0) * 1.3rem);
 }
 
 .file-tree-item-prefix {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     width: 20px;
     height: 20px;
+    margin: 0 0.25rem 0 0;
 }
