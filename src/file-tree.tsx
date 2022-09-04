@@ -1,8 +1,8 @@
 import "./file-tree.css"
 import {useCallback, useMemo} from "react"
 import {observer} from "mobx-react-lite"
-import {FSTreeItem, FSTreeVirtualizer, FSViewModel} from "./file-system"
-import {Virtualizer} from "./virtualizer"
+import {FSViewModel} from "./file-system"
+import {Virtualizer, FSTreeItem, FSTreeVirtualizer} from "./virtualizer"
 import {cx, HStack} from "./primitives"
 
 export let FileTree = ({view}: {view: FSViewModel}) => {
@@ -20,7 +20,7 @@ export let FileTree = ({view}: {view: FSViewModel}) => {
             onKeyDown={(e) => {
                 if (e.ctrlKey && e.key === "a") {
                     e.preventDefault()
-                    view.selection.updateRange(
+                    view.selection.selectRange(
                         view.cwd.children,
                         0,
                         Infinity,

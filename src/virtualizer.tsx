@@ -1,5 +1,7 @@
 import "./virtualizer.css"
 import {useEffect, useRef, useState} from "react"
+import {makeAutoObservable} from "mobx"
+import {FSItem, FSViewModel, Directory} from "./file-system"
 
 interface IVirtualizer<T> {
     items: T[]
@@ -72,4 +74,45 @@ export let Virtualizer = <T,>({
             </div>
         </div>
     )
+}
+
+export interface FSTreeItem {
+    key: string
+    item: FSItem
+    depth: number
+    setSize: number
+    posInSet: number
+}
+export class FSTreeVirtualizer {
+    private view: FSViewModel
+
+    constructor(view: FSViewModel) {
+        this.view = view
+        makeAutoObservable<this, "view">(this, {
+            view: false,
+        })
+    }
+
+    // TODO: this should either be an iterator or accept a start/end index so
+    // that we don't have to walk the whole tree when only a subset is needed.
+    get items(): FSTreeItem[] {
+        const items: FSTreeItem[] = []
+        const walk = (dir: Directory, depth = 0) => {
+            for (let i = 0; i < dir.children.length; i++) {
+                const item = dir.children[i]
+                items.push({
+                    key: item.path,
+                    item,
+                    setSize: dir.children.length,
+                    posInSet: i,
+                    depth,
+                })
+                if (item.type === "directory" && this.view.expanded(item)) {
+                    walk(item, depth + 1)
+                }
+            }
+        }
+        walk(this.view.cwd)
+        return items
+    }
 }

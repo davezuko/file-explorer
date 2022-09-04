@@ -63,7 +63,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
             onKeyDown={(e) => {
                 if (e.ctrlKey && e.key === "a") {
                     e.preventDefault()
-                    view.selection.updateRange(
+                    view.selection.selectRange(
                         view.cwd.children,
                         0,
                         Infinity,
