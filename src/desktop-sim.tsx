@@ -259,12 +259,12 @@ export const useWindowTitle = (app: string, title?: string) => {
 /**
  * Sets the title in the host window, if it exists.
  */
-export const useWindowDetails = (details: string | null) => {
+export const useWindowDetails = (details: string | null | false) => {
     const win = useWindowContext()
     useEffect(() => {
         if (!win) return
         runInAction(() => {
-            win.details = details
+            win.details = details || null
         })
     }, [win, details])
 }

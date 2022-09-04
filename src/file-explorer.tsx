@@ -21,7 +21,9 @@ export let FileExplorer = ({root}: {root: Directory}) => {
     const view = useMemo(() => new FSViewModel(root), [root])
     const items = view.cwd.children.length
     useWindowTitle("File Explorer", view.cwd.name)
-    useWindowDetails(`${items} ${items === 1 ? "item" : "items"}`)
+    useWindowDetails(
+        !view.cwd.deleted && `${items} ${items === 1 ? "item" : "items"}`,
+    )
     useEffect(() => {
         view.selection.clear()
     }, [view.cwd])
@@ -29,10 +31,21 @@ export let FileExplorer = ({root}: {root: Directory}) => {
     return (
         <>
             <FileExplorerToolbar view={view} />
-            <HStack flex={1}>
-                <FileTree view={view} />
-                <DirectoryView view={view} />
-            </HStack>
+            {view.cwd.deleted ? (
+                <VStack
+                    flex={1}
+                    align="center"
+                    justify="center"
+                    className="panel"
+                >
+                    <p>This directory has been removed.</p>
+                </VStack>
+            ) : (
+                <HStack flex={1}>
+                    <FileTree view={view} />
+                    <DirectoryView view={view} />
+                </HStack>
+            )}
         </>
     )
 }
