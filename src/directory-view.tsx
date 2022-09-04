@@ -12,7 +12,7 @@ const ITEM_HEIGHT = 75
 
 export let DirectoryView = ({view}: {view: FSViewModel}) => {
     const ref = useRef<HTMLDivElement>(null!)
-    const cols = useAvailableColumns(ref, ITEM_WIDTH)
+    const [cols, gutter] = useAvailableColumns(ref, ITEM_WIDTH)
     const rows = useMemo(() => {
         const rows: FSItem[][] = []
         let row: FSItem[] = []
@@ -35,7 +35,6 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 <HStack
                     key={row[0].name}
                     style={style}
-                    gap={0.75}
                     className="directory-view-row"
                     align="start"
                 >
@@ -59,6 +58,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
             ref={ref}
             tabIndex={0}
             className="directory-view panel"
+            style={{"--gutter": `${gutter}px`} as React.CSSProperties}
             onClick={(e) => {
                 // the user can click on the canvas to clear the current
                 // selection. Do not clear the selection if a modifier key
@@ -94,20 +94,22 @@ DirectoryView = observer(DirectoryView)
 const useAvailableColumns = (
     ref: React.MutableRefObject<HTMLDivElement>,
     width: number,
-): number => {
+): [number, number] => {
     const [columns, setColumns] = useState(0)
+    const [gutter, setGutter] = useState(0)
     useEffect(() => {
         const ro = new ResizeObserver((entries) => {
             const rect = entries[0].contentRect
             const cols = Math.floor(rect.width / ITEM_WIDTH)
             setColumns(cols)
+            setGutter((rect.width % cols) / 2)
         })
         ro.observe(ref.current)
         return () => {
             ro.disconnect()
         }
     }, [ref, width])
-    return columns
+    return [columns, gutter]
 }
 
 let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
