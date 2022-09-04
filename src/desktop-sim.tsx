@@ -37,6 +37,8 @@ export class WindowManager {
         return w
     }
 }
+export const WindowManagerContext = createContext<WindowManager>(null!)
+export const useWindowManager = () => useContext(WindowManagerContext)
 
 class DesktopWindow {
     private manager: WindowManager
@@ -75,13 +77,15 @@ class DesktopWindow {
  */
 export let Desktop = ({windows: wm}: {windows: WindowManager}) => {
     return (
-        <div className="desktop">
-            <div className="desktop-body">
-                {wm.windows.map((win) => {
-                    return <WindowObserver key={win.id} window={win} />
-                })}
+        <WindowManagerContext.Provider value={wm}>
+            <div className="desktop">
+                <div className="desktop-body">
+                    {wm.windows.map((win) => {
+                        return <WindowObserver key={win.id} window={win} />
+                    })}
+                </div>
             </div>
-        </div>
+        </WindowManagerContext.Provider>
     )
 }
 Desktop = observer(Desktop)
@@ -282,8 +286,22 @@ const useAutoWindowSize = (
             WINDOW_MAX_WIDTH,
         )
         const height = width / WINDOW_ASPECT_RATIO
-        const top = container.height / 2 - height / 2
-        const left = container.width / 2 - width / 2
+        let top = container.height / 2 - height / 2
+        let left = container.width / 2 - width / 2
+
+        // Quick hack for positioning this window so that it's slightly offset
+        // from the previous one.
+        // TODO: an "actual" solution to this that makes sure to reference the
+        // correct window. Also probably involves storing window coordinates on
+        // the instance and using that.
+        const windows = Array.from(document.querySelectorAll(".window"))
+        const prev = windows.reverse().find((el) => el !== elem)
+        if (prev) {
+            const r = prev.getBoundingClientRect()
+            top = r.top + 30
+            left = r.left + 30
+        }
+
         elem.style.top = top + "px"
         elem.style.left = left + "px"
         elem.style.width = width + "px"

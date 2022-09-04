@@ -10,7 +10,12 @@ import {
 import {FileTree} from "./file-tree"
 import {DirectoryView} from "./directory-view"
 import {Button, HStack, VStack} from "./primitives"
-import {useWindowContext, useWindowDetails, useWindowTitle} from "./desktop-sim"
+import {
+    useWindowContext,
+    useWindowDetails,
+    useWindowManager,
+    useWindowTitle,
+} from "./desktop-sim"
 
 export let FileExplorer = ({root}: {root: Directory}) => {
     const view = useMemo(() => new FSViewModel(root), [root])
@@ -35,6 +40,8 @@ FileExplorer = observer(FileExplorer)
 
 const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
     const win = useWindowContext()!
+    const wm = useWindowManager()
+
     const create = (type: FSItem["type"]) => {
         win.openDialog(
             "Create new...",
@@ -68,6 +75,10 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
     return (
         <VStack gap={1} style={{padding: "0.25rem"}}>
             <HStack gap={0.5}>
+                <Button
+                    text="Help"
+                    onClick={() => win.openDialog("Help", <Help />)}
+                />
                 <Button text="+ File" onClick={() => create("file")} />
                 <Button text="+ Folder" onClick={() => create("directory")} />
                 <Button
@@ -79,8 +90,10 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
                     onClick={() => seedDirectory(view.cwd, 10_000)}
                 />
                 <Button
-                    text="Help"
-                    onClick={() => win.openDialog("Help", <Help />)}
+                    text="New Window"
+                    onClick={() => {
+                        wm.createWindow(<FileExplorer root={view.cwd} />)
+                    }}
                 />
             </HStack>
             <LocationEditor view={view} />
