@@ -79,21 +79,15 @@ export class Directory {
             .sort((a, b) => a.name.localeCompare(b.name))
     }
 
-    set children(children: FSItem[]) {
-        if (this.deleted) {
-            throw new Error("cannot set children on a deleted directory")
-        }
-        this._children = children
-    }
-
     delete(item: FSItem) {
-        this._children = this._children.filter((child) => {
-            if (child !== item) return true
-            if (item.type === "directory") {
-                item.children = []
-                item.deleted = true
+        if (item.type === "directory") {
+            for (const child of item.children) {
+                item.delete(child)
             }
-            return false
+            item.deleted = true
+        }
+        this._children = this._children.filter((child) => {
+            return child !== item
         })
     }
 }
