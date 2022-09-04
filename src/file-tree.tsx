@@ -26,6 +26,8 @@ export let FileTree = ({view}: {view: FSViewModel}) => {
                         Infinity,
                         true,
                     )
+                } else if (e.key === "Delete") {
+                    view.deleteSelection()
                 }
             }}
         >

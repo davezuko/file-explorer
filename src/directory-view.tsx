@@ -75,6 +75,8 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                         Infinity,
                         true,
                     )
+                } else if (e.key === "Delete") {
+                    view.deleteSelection()
                 }
             }}
         >
@@ -122,11 +124,6 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
                     item,
                     e.nativeEvent,
                 )
-            }}
-            onKeyDown={(e) => {
-                if (selected && e.ctrlKey && e.key === "Delete") {
-                    view.deleteSelection()
-                }
             }}
             tabIndex={0}
         >
