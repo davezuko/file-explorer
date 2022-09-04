@@ -27,7 +27,12 @@ export class File {
     }
 
     get ext(): string {
-        return this.name.split(".").at(-1)!
+        const parts = this.name.split(".")
+        if (parts.length === 1) {
+            return this.name.startsWith(".") ? parts[0] : ""
+        } else {
+            return parts.at(-1) || ""
+        }
     }
 }
 

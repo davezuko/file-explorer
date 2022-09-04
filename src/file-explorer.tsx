@@ -234,6 +234,8 @@ export const FileIcon = ({
 
 const lookupIcon = (ext: string): string => {
     switch (ext) {
+        case "":
+            return "unknown"
         case "ppt":
         case "xls":
         case "doc":
@@ -243,6 +245,7 @@ const lookupIcon = (ext: string): string => {
         case "rb":
         case "py":
         case "js":
+        case "json":
         case "ts":
         case "ts":
         case "tsx":
