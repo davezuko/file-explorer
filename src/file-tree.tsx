@@ -4,6 +4,7 @@ import {observer} from "mobx-react-lite"
 import {FSViewModel} from "./file-system"
 import {Virtualizer, FSTreeItem, FSTreeVirtualizer} from "./virtualizer"
 import {cx, HStack} from "./primitives"
+import {FileIcon} from "./file-explorer"
 
 export let FileTree = ({view}: {view: FSViewModel}) => {
     const virtualizer = useMemo(() => new FSTreeVirtualizer(view), [view])
@@ -54,10 +55,10 @@ let FileTreeItem = ({
     const prefix = () => {
         if (item.type === "file") {
             return (
-                <img
+                <FileIcon
+                    item={item}
                     className="file-tree-item-prefix"
                     style={{padding: "2px"}}
-                    src="/img/icon-file-txt.png"
                 />
             )
         }

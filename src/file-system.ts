@@ -25,6 +25,10 @@ export class File {
     get path() {
         return filepath(this)
     }
+
+    get ext(): string {
+        return this.name.split(".").at(-1)!
+    }
 }
 
 export class Directory {
@@ -142,37 +146,37 @@ export class FSViewModel {
 export const seedDirectory = (dir: Directory, count: number) => {
     runInAction(() => {
         {
-            let d = dir.add(new Directory("Directory 1"))
-            d.add(new File("File 1"))
-            d.add(new File("File 2"))
-            d.add(new File("File 3"))
+            let d = dir.add(new Directory("directory-1"))
+            d.add(new File("file-1.txt"))
+            d.add(new File("file-2.txt"))
+            d.add(new File("file-3.txt"))
         }
         {
-            let d = dir.add(new Directory("Directory 2"))
-            d.add(new File("File 1"))
-            d.add(new File("File 2"))
-            d.add(new File("File 3"))
+            let d = dir.add(new Directory("directory-2"))
+            d.add(new File("file-1.txt"))
+            d.add(new File("file-2.txt"))
+            d.add(new File("file-3.txt"))
             {
-                let dd = d.add(new Directory("Directory 1"))
-                dd.add(new File("File 1"))
-                dd.add(new File("File 2"))
-                dd.add(new File("File 3"))
+                let dd = d.add(new Directory("directory-1"))
+                dd.add(new File("file-1.txt"))
+                dd.add(new File("file-2.txt"))
+                dd.add(new File("file-3.txt"))
             }
             {
-                let dd = d.add(new Directory("Directory 2"))
-                dd.add(new File("File 1"))
-                dd.add(new File("File 2"))
-                dd.add(new File("File 3"))
+                let dd = d.add(new Directory("directory-2"))
+                dd.add(new File("file-1.txt"))
+                dd.add(new File("file-2.txt"))
+                dd.add(new File("file-3.txt"))
                 {
-                    let ddd = dd.add(new Directory("Directory 1"))
-                    ddd.add(new File("File 1"))
-                    ddd.add(new File("File 2"))
-                    ddd.add(new File("File 3"))
+                    let ddd = dd.add(new Directory("directory-1"))
+                    ddd.add(new File("file-1.txt"))
+                    ddd.add(new File("file-2.txt"))
+                    ddd.add(new File("file-3.txt"))
                 }
             }
         }
         for (let i = 1; i <= count; i++) {
-            dir.add(new File(`File ${i}`))
+            dir.add(new File(`file-${i}.txt`))
         }
     })
 }

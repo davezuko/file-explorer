@@ -163,3 +163,24 @@ const CreateItemForm = ({
         </form>
     )
 }
+
+export const FileIcon = ({
+    item,
+    ...rest
+}: JSX.IntrinsicElements["img"] & {item: FSItem}) => {
+    const [error, setError] = useState(false)
+    useEffect(() => {
+        setError(false)
+    }, [item])
+
+    let src =
+        item.type === "directory"
+            ? "/img/icon-directory.png"
+            : `/img/icon-file-${item.ext}.png`
+
+    if (error) {
+        src = "/img/icon-file-unknown.png"
+    }
+
+    return <img src={src} onError={() => setError(true)} {...rest} />
+}

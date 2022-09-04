@@ -4,6 +4,7 @@ import {observer} from "mobx-react-lite"
 import {FSItem, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
 import {cx, HStack, VStack} from "./primitives"
+import {FileIcon} from "./file-explorer"
 
 // TODO: compute at render time.
 const ITEM_WIDTH = 72
@@ -127,7 +128,7 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
             }}
             tabIndex={0}
         >
-            <img className="directory-view-item-image" />
+            <FileIcon className="directory-view-item-image" item={item} />
             <span className="directory-view-item-name truncate">
                 {item.name}
             </span>
