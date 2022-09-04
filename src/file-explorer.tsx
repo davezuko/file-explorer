@@ -11,6 +11,10 @@ export let FileExplorer = ({root}: {root: Directory}) => {
     const items = view.cwd.children.length
     useWindowTitle("File Explorer", view.cwd.name)
     useWindowDetails(`${items} ${items === 1 ? "item" : "items"}`)
+    useEffect(() => {
+        view.selection.clear()
+    }, [view.cwd])
+
     return (
         <>
             <FileExplorerToolbar view={view} />
@@ -58,6 +62,15 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
     return (
         <header>
             <HStack>
+                <Button
+                    text="Parent"
+                    disabled={!view.cwd.parent}
+                    onClick={() => {
+                        if (view.cwd.parent) {
+                            view.cwd = view.cwd.parent
+                        }
+                    }}
+                />
                 <Button text="+ File" onClick={() => create("file")} />
                 <Button text="+ Folder" onClick={() => create("directory")} />
                 <Button

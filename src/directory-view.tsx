@@ -120,11 +120,17 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
             )}
             onClick={(e) => {
                 e.stopPropagation()
-                view.selection.fromClickEvent(
-                    view.cwd.children,
-                    item,
-                    e.nativeEvent,
-                )
+                if (e.detail > 1) {
+                    if (item.type === "directory") {
+                        view.cwd = item
+                    }
+                } else {
+                    view.selection.fromClickEvent(
+                        view.cwd.children,
+                        item,
+                        e.nativeEvent,
+                    )
+                }
             }}
             tabIndex={0}
         >
