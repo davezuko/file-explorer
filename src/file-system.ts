@@ -38,22 +38,32 @@ export class File {
 
 export class Directory {
     private _children: FSItem[] = []
+    private _deleted = false
     name: string
     type = "directory" as const
     parent: Directory | null = null
-    deleted = false
 
     constructor(name: string) {
         this.name = name
-        makeAutoObservable<this, "_children">(this, {
+        makeAutoObservable<this, "_children" | "_deleted">(this, {
+            _children: observable.shallow,
+            _deleted: true,
             type: false,
             parent: observable.ref,
-            _children: observable.shallow,
         })
     }
 
     get path() {
         return filepath(this)
+    }
+
+    get deleted(): boolean {
+        return this._deleted || !!this.parent?._deleted
+    }
+
+    delete() {
+        this._deleted = true
+        this._children = []
     }
 
     add<T extends FSItem>(item: T): T {
@@ -79,15 +89,13 @@ export class Directory {
             .sort((a, b) => a.name.localeCompare(b.name))
     }
 
-    delete(item: FSItem) {
-        if (item.type === "directory") {
-            for (const child of item.children) {
-                item.delete(child)
-            }
-            item.deleted = true
-        }
+    remove(items: Set<FSItem>) {
         this._children = this._children.filter((child) => {
-            return child !== item
+            if (!items.has(child)) return true
+            if (child.type === "directory") {
+                child.delete()
+            }
+            return false
         })
     }
 }
@@ -149,8 +157,19 @@ export class FSViewModel {
         // TODO: would theoretically be more efficient to topologically sort
         // items scheduled for deletion so that we don't bother with child
         // items if their parent is also going to be deleted.
+        const parents = new Map<Directory, Set<FSItem>>()
         for (const item of this.selection.items) {
-            item.parent?.delete(item)
+            if (!item.parent) continue
+
+            let group = parents.get(item.parent)
+            if (!group) {
+                group = new Set()
+                parents.set(item.parent, group)
+            }
+            group.add(item)
+        }
+        for (const [parent, items] of parents) {
+            parent.remove(items)
         }
         this.selection = new Selection(this.cwd.children)
     }
