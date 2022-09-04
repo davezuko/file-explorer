@@ -85,10 +85,6 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
     return (
         <VStack gap={1} style={{padding: "0.25rem"}}>
             <HStack gap={0.5}>
-                <Button
-                    text="Help"
-                    onClick={() => win.openDialog("Help", <Help />)}
-                />
                 <Button text="+ File" onClick={() => create("file")} />
                 <Button text="+ Folder" onClick={() => create("directory")} />
                 <Button
@@ -132,10 +128,6 @@ const LocationEditor = ({view}: {view: FSViewModel}) => {
             </HStack>
         </HStack>
     )
-}
-
-const Help = () => {
-    return <div>TODO</div>
 }
 
 const CreateItemForm = ({
