@@ -1,11 +1,33 @@
 import "./directory-view.css"
-import {useCallback, useMemo} from "react"
+import {useCallback, useEffect, useMemo, useRef, useState} from "react"
 import {observer} from "mobx-react-lite"
 import {FSItem, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
 import {cx, HStack, VStack} from "./primitives"
 
+// TODO: compute at render time.
+const ITEM_WIDTH = 72
+const ITEM_HEIGHT = 75
+
 export let DirectoryView = ({view}: {view: FSViewModel}) => {
+    const ref = useRef<HTMLDivElement>(null!)
+    const cols = useAvailableColumns(ref, ITEM_WIDTH)
+    const rows = useMemo(() => {
+        const rows: FSItem[][] = []
+        let row: FSItem[] = []
+        for (const item of view.cwd.children) {
+            row.push(item)
+            if (row.length === cols) {
+                rows.push(row)
+                row = []
+            }
+        }
+        if (row.length) {
+            rows.push(row)
+        }
+        return rows
+    }, [cols, view.cwd.children, view.cwd.children.length])
+
     const renderItem = useCallback(
         (row: FSItem[], style: React.CSSProperties) => {
             return (
@@ -31,25 +53,9 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
         [],
     )
 
-    const columns = 9 // TODO: compute based on available space
-    const rows = useMemo(() => {
-        const rows: FSItem[][] = []
-        let row: FSItem[] = []
-        for (let i = 0; i < view.cwd.children.length; i++) {
-            row.push(view.cwd.children[i])
-            if (row.length === columns) {
-                rows.push(row)
-                row = []
-            }
-        }
-        if (row.length) {
-            rows.push(row)
-        }
-        return rows
-    }, [columns, view.cwd.children, view.cwd.children.length])
-
     return (
         <div
+            ref={ref}
             tabIndex={0}
             className="directory-view panel"
             onClick={(e) => {
@@ -72,11 +78,34 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 }
             }}
         >
-            <Virtualizer items={rows} itemHeight={75} renderItem={renderItem} />
+            <Virtualizer
+                items={rows}
+                itemHeight={ITEM_HEIGHT}
+                renderItem={renderItem}
+            />
         </div>
     )
 }
 DirectoryView = observer(DirectoryView)
+
+const useAvailableColumns = (
+    ref: React.MutableRefObject<HTMLDivElement>,
+    width: number,
+): number => {
+    const [columns, setColumns] = useState(0)
+    useEffect(() => {
+        const ro = new ResizeObserver((entries) => {
+            const rect = entries[0].contentRect
+            const cols = Math.floor(rect.width / ITEM_WIDTH)
+            setColumns(cols)
+        })
+        ro.observe(ref.current)
+        return () => {
+            ro.disconnect()
+        }
+    }, [ref, width])
+    return columns
+}
 
 let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
     const selected = view.selected(item)
