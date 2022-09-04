@@ -50,6 +50,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
 
     return (
         <div
+            tabIndex={0}
             className="directory-view panel"
             onClick={(e) => {
                 // the user can click on the canvas to clear the current
@@ -57,6 +58,17 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 // is pressed since that may just be a misclick.
                 if (!e.ctrlKey && !e.shiftKey) {
                     view.selection.clear()
+                }
+            }}
+            onKeyDown={(e) => {
+                if (e.ctrlKey && e.key === "a") {
+                    e.preventDefault()
+                    view.selection.updateRange(
+                        view.cwd.children,
+                        0,
+                        Infinity,
+                        true,
+                    )
                 }
             }}
         >

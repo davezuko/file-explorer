@@ -14,7 +14,21 @@ export let FileTree = ({view}: {view: FSViewModel}) => {
         [view],
     )
     return (
-        <div className="file-tree panel">
+        <div
+            tabIndex={0}
+            className="file-tree panel"
+            onKeyDown={(e) => {
+                if (e.ctrlKey && e.key === "a") {
+                    e.preventDefault()
+                    view.selection.updateRange(
+                        view.cwd.children,
+                        0,
+                        Infinity,
+                        true,
+                    )
+                }
+            }}
+        >
             <Virtualizer
                 items={virtualizer.items}
                 itemHeight={24}
