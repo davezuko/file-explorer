@@ -68,7 +68,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 }
             }}
             onKeyDown={(e) => {
-                if (e.ctrlKey && e.key === "a") {
+                if ((e.ctrlKey || e.metaKey) && e.key === "a") {
                     e.preventDefault()
                     view.selection.selectRange(
                         view.cwd.children,
@@ -76,7 +76,7 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                         Infinity,
                         true,
                     )
-                } else if (e.key === "Delete") {
+                } else if (e.key === "Delete" || e.key === "Backspace") {
                     view.deleteSelection()
                 }
             }}
