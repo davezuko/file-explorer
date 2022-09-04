@@ -15,6 +15,10 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
     const [cols, gutter] = useAvailableColumns(ref, ITEM_WIDTH)
     const rows = useMemo(() => {
         const rows: FSItem[][] = []
+        if (cols === 0) {
+            return rows
+        }
+
         let row: FSItem[] = []
         for (const item of view.cwd.children) {
             row.push(item)
@@ -36,7 +40,6 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                     key={row[0].name}
                     style={style}
                     className="directory-view-row"
-                    align="start"
                 >
                     {row.map((item) => {
                         return (

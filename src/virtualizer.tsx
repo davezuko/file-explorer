@@ -1,5 +1,5 @@
 import "./virtualizer.css"
-import {useEffect, useRef, useState} from "react"
+import {memo, useEffect, useRef, useState} from "react"
 import {makeAutoObservable} from "mobx"
 import {FSItem, FSViewModel, Directory} from "./file-system"
 
@@ -16,7 +16,6 @@ export let Virtualizer = <T,>({
     renderItem,
 }: IVirtualizer<T>) => {
     const viewportRef = useRef<HTMLDivElement>(null!)
-    const [ready, setReady] = useState(false)
     const [scrollTop, setScrollTop] = useState(0)
     const [viewportHeight, setViewportHeight] = useState(0)
     const height = items.length * itemHeight
@@ -34,7 +33,6 @@ export let Virtualizer = <T,>({
         })
         ro.observe(viewportRef.current)
         handleScroll()
-        setReady(true)
         return () => {
             ro.disconnect()
         }
@@ -64,17 +62,15 @@ export let Virtualizer = <T,>({
         return children
     }
 
-    // console.log({scrollTop, height, viewportHeight, offset, start, end})
-    // console.log({start, end, visible, bufferSize})
-    // console.log("[virtualizer] render %s items (max: %s)", children.length)
     return (
         <div className="virtualizer" ref={viewportRef} onScroll={handleScroll}>
             <div style={{position: "relative", height: height + "px"}}>
-                {ready && renderItems()}
+                {height > 0 && renderItems()}
             </div>
         </div>
     )
 }
+Virtualizer = memo(Virtualizer) as any
 
 export interface FSTreeItem {
     key: string
