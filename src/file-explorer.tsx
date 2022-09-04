@@ -28,24 +28,21 @@ export let FileExplorer = ({root}: {root: Directory}) => {
         view.selection.clear()
     }, [view.cwd])
 
+    if (view.cwd.deleted) {
+        return (
+            <VStack flex={1} align="center" justify="center" className="panel">
+                <p>This directory has been removed.</p>
+            </VStack>
+        )
+    }
+
     return (
         <>
             <FileExplorerToolbar view={view} />
-            {view.cwd.deleted ? (
-                <VStack
-                    flex={1}
-                    align="center"
-                    justify="center"
-                    className="panel"
-                >
-                    <p>This directory has been removed.</p>
-                </VStack>
-            ) : (
-                <HStack flex={1}>
-                    <FileTree view={view} />
-                    <DirectoryView view={view} />
-                </HStack>
-            )}
+            <HStack flex={1}>
+                <FileTree view={view} />
+                <DirectoryView view={view} />
+            </HStack>
         </>
     )
 }
