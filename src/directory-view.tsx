@@ -81,11 +81,15 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 }
             }}
         >
-            <Virtualizer
-                items={rows}
-                itemHeight={ITEM_HEIGHT}
-                renderItem={renderItem}
-            />
+            {view.cwd.deleted ? (
+                <p>This folder has been removed.</p>
+            ) : (
+                <Virtualizer
+                    items={rows}
+                    itemHeight={ITEM_HEIGHT}
+                    renderItem={renderItem}
+                />
+            )}
         </div>
     )
 }

@@ -36,6 +36,7 @@ export class Directory {
     name: string
     type = "directory" as const
     parent: Directory | null = null
+    deleted = false
 
     constructor(name: string) {
         this.name = name
@@ -51,6 +52,9 @@ export class Directory {
     }
 
     add<T extends FSItem>(item: T): T {
+        if (this.deleted) {
+            throw new Error("cannot add item to a deleted directory")
+        }
         item.parent = this
         this._children.push(item)
         return item
@@ -70,9 +74,21 @@ export class Directory {
             .sort((a, b) => a.name.localeCompare(b.name))
     }
 
-    delete(items: Set<FSItem>) {
+    set children(children: FSItem[]) {
+        if (this.deleted) {
+            throw new Error("cannot set children on a deleted directory")
+        }
+        this._children = children
+    }
+
+    delete(item: FSItem) {
         this._children = this._children.filter((child) => {
-            return !items.has(child)
+            if (child !== item) return true
+            if (item.type === "directory") {
+                item.children = []
+                item.deleted = true
+            }
+            return false
         })
     }
 }
@@ -131,7 +147,12 @@ export class FSViewModel {
     }
 
     deleteSelection() {
-        this.cwd.delete(this.selection.items)
+        // TODO: would theoretically be more efficient to topologically sort
+        // items scheduled for deletion so that we don't bother with child
+        // items if their parent is also going to be deleted.
+        for (const item of this.selection.items) {
+            item.parent?.delete(item)
+        }
         this.selection = new Selection(this.cwd.children)
     }
 
