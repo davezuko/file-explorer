@@ -1,6 +1,12 @@
-import {useEffect, useMemo, useRef, useState} from "react"
+import {useEffect, useMemo, useRef, useState, Fragment} from "react"
 import {observer} from "mobx-react-lite"
-import {FSItem, Directory, FSViewModel, seedDirectory} from "./file-system"
+import {
+    FSItem,
+    Directory,
+    FSViewModel,
+    seedDirectory,
+    parents,
+} from "./file-system"
 import {FileTree} from "./file-tree"
 import {DirectoryView} from "./directory-view"
 import {Button, HStack, VStack} from "./primitives"
@@ -60,17 +66,8 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
         )
     }
     return (
-        <header>
-            <HStack>
-                <Button
-                    text="Parent"
-                    disabled={!view.cwd.parent}
-                    onClick={() => {
-                        if (view.cwd.parent) {
-                            view.cwd = view.cwd.parent
-                        }
-                    }}
-                />
+        <VStack gap={1} style={{padding: "0.25rem"}}>
+            <HStack gap={0.5}>
                 <Button text="+ File" onClick={() => create("file")} />
                 <Button text="+ Folder" onClick={() => create("directory")} />
                 <Button
@@ -86,7 +83,31 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
                     onClick={() => win.openDialog("Help", <Help />)}
                 />
             </HStack>
-        </header>
+            <LocationEditor view={view} />
+        </VStack>
+    )
+}
+
+const LocationEditor = ({view}: {view: FSViewModel}) => {
+    const path = [...parents(view.cwd), view.cwd]
+    return (
+        <HStack gap={1} align="center" style={{marginLeft: "0.25rem"}}>
+            <span>Location:</span>
+            <HStack gap={0.5} align="center">
+                {path.map((dir, idx) => {
+                    return (
+                        <Fragment key={dir.path}>
+                            {idx !== 0 && (
+                                <span style={{margin: "0 0.25rem"}}>{">"}</span>
+                            )}
+                            <Button onClick={() => (view.cwd = dir)}>
+                                {dir.name}
+                            </Button>
+                        </Fragment>
+                    )
+                })}
+            </HStack>
+        </HStack>
     )
 }
 

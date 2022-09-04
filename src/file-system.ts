@@ -143,6 +143,17 @@ export class FSViewModel {
     }
 }
 
+export const parents = (item: FSItem): Directory[] => {
+    const parents: Directory[] = []
+    do {
+        item = item.parent!
+        if (item) {
+            parents.unshift(item)
+        }
+    } while (item)
+    return parents
+}
+
 export const seedDirectory = (dir: Directory, count: number) => {
     runInAction(() => {
         {
