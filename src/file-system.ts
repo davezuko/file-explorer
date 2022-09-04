@@ -154,40 +154,80 @@ export const parents = (item: FSItem): Directory[] => {
     return parents
 }
 
-export const seedDirectory = (dir: Directory, count: number) => {
+export const seedDirectory = (root: Directory, count: number) => {
+    let counter = 1
+    const extensions = [
+        "txt",
+        "ppt",
+        "xls",
+        "doc",
+        "docx",
+        "lua",
+        "rb",
+        "py",
+        "js",
+        "ts",
+        "ts",
+        "tsx",
+        "jpeg",
+        "wav",
+        "mp3",
+        "mov",
+        "mp4",
+        "avi",
+        "flv",
+        "swf",
+        "webm",
+    ]
+
+    const dir = (name?: string) => {
+        if (name) {
+            return new Directory(name)
+        }
+        return new Directory(`directory-${counter++}`)
+    }
+
+    const file = (name?: string) => {
+        if (name) {
+            return new File(name)
+        }
+        const ext = extensions[Math.floor(Math.random() * extensions.length)]
+        return new File(`file-${counter++}.${ext}`)
+    }
+
     runInAction(() => {
         {
-            let d = dir.add(new Directory("directory-1"))
-            d.add(new File("file-1.txt"))
-            d.add(new File("file-2.txt"))
-            d.add(new File("file-3.txt"))
+            let d = root.add(dir("directory-1"))
+            d.add(file())
+            d.add(file())
+            d.add(file())
         }
         {
-            let d = dir.add(new Directory("directory-2"))
-            d.add(new File("file-1.txt"))
-            d.add(new File("file-2.txt"))
-            d.add(new File("file-3.txt"))
+            let d = root.add(dir("directory-2"))
+            d.add(file())
+            d.add(file())
+            d.add(file())
             {
-                let dd = d.add(new Directory("directory-1"))
-                dd.add(new File("file-1.txt"))
-                dd.add(new File("file-2.txt"))
-                dd.add(new File("file-3.txt"))
+                let dd = d.add(dir("directory-1"))
+                dd.add(file())
+                dd.add(file())
+                dd.add(file())
             }
             {
-                let dd = d.add(new Directory("directory-2"))
-                dd.add(new File("file-1.txt"))
-                dd.add(new File("file-2.txt"))
-                dd.add(new File("file-3.txt"))
+                let dd = d.add(dir("directory-2"))
+                dd.add(file())
+                dd.add(file())
+                dd.add(file())
                 {
-                    let ddd = dd.add(new Directory("directory-1"))
-                    ddd.add(new File("file-1.txt"))
-                    ddd.add(new File("file-2.txt"))
-                    ddd.add(new File("file-3.txt"))
+                    let ddd = dd.add(dir("directory-1"))
+                    ddd.add(file())
+                    ddd.add(file())
+                    ddd.add(file())
                 }
             }
         }
         for (let i = 1; i <= count; i++) {
-            dir.add(new File(`file-${i}.txt`))
+            root.add(file())
         }
     })
 }

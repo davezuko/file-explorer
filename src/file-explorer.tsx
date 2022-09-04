@@ -210,11 +210,43 @@ export const FileIcon = ({
     let src =
         item.type === "directory"
             ? "/img/icon-directory.png"
-            : `/img/icon-file-${item.ext}.png`
+            : `/img/icon-file-${lookupIcon(item.ext)}.png`
 
     if (error) {
         src = "/img/icon-file-unknown.png"
     }
 
     return <img src={src} onError={() => setError(true)} {...rest} />
+}
+
+const lookupIcon = (ext: string): string => {
+    switch (ext) {
+        case "ppt":
+        case "xls":
+        case "doc":
+        case "docx":
+            return "txt"
+        case "lua":
+        case "rb":
+        case "py":
+        case "js":
+        case "ts":
+        case "ts":
+        case "tsx":
+            return "script"
+        case "jpeg":
+            return "jpg"
+        case "wav":
+        case "mp3":
+            return "audio"
+        case "mov":
+        case "mp4":
+        case "avi":
+        case "flv":
+        case "swf":
+        case "webm":
+            return "video"
+        default:
+            return ext
+    }
 }
