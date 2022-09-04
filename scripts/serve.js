@@ -1,9 +1,15 @@
+import fs from "fs"
+import cp from "child_process"
 import http from "http"
 import connect from "connect"
 import compression from "compression"
 import serveStatic from "serve-static"
 
 const main = async () => {
+    if (!fs.existsSync("dist")) {
+        console.info("app not built, building now...")
+        cp.execSync("yarn build", {stdio: "inherit"})
+    }
     const app = connect()
     app.use(compression())
     app.use(serveStatic("./dist"))
