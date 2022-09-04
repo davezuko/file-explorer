@@ -9,7 +9,7 @@ import {
 } from "react"
 import {makeAutoObservable, observable, runInAction} from "mobx"
 import {observer} from "mobx-react-lite"
-import {Button, HStack, VStack} from "./primitives"
+import {Button, cx, HStack, VStack} from "./primitives"
 
 const WINDOW_ASPECT_RATIO = 4 / 3
 const WINDOW_MIN_WIDTH = 640
@@ -34,6 +34,7 @@ export class WindowManager {
         const w = new DesktopWindow(this, this.lastId++)
         w.element = element
         this.windows.push(w)
+        w.focus()
         return w
     }
 }
@@ -45,6 +46,7 @@ class DesktopWindow {
     id: number
     title = "New Window"
     element: React.ReactElement | null = null
+    focused = false
     details?: string | null = null
     dialog?: {title: string; element: React.ReactElement} | null = null
 
@@ -57,6 +59,14 @@ class DesktopWindow {
             element: observable.ref,
             dialog: observable.ref,
         })
+    }
+
+    focus() {
+        if (this.focused) return
+        this.focused = true
+        for (const w of this.manager.windows) {
+            w.focused = w === this
+        }
     }
 
     close() {
@@ -97,16 +107,20 @@ const Window = ({
     children,
     title,
     onClose,
+    focused,
+    onMouseDown,
     autoSize = true,
     draggable = true,
     canMinimize = true,
     canMaximize = true,
 }: {
     children: React.ReactNode
+    focused?: boolean
     autoSize?: boolean
     draggable?: boolean
     title?: string
     onClose?(): void
+    onMouseDown?(): void
     canMinimize?: boolean
     canMaximize?: boolean
 }) => {
@@ -115,7 +129,11 @@ const Window = ({
     useAutoWindowSize(ref, autoSize)
     useDraggable(ref, titlebarRef, draggable)
     return (
-        <div className="window" ref={ref}>
+        <div
+            ref={ref}
+            className={cx("window", focused && "focused")}
+            onMouseDown={onMouseDown}
+        >
             <header className="window-titlebar" ref={titlebarRef}>
                 <span className="window-title">{title}</span>
                 <HStack gap={0.25} className="window-buttons">
@@ -139,10 +157,19 @@ export const useWindowContext = () => useContext(WindowContext)
  * is just a 'dumb' renderer that's reused in different ways.
  */
 let WindowObserver = ({window: win}: {window: DesktopWindow}) => {
-    const {element, details, title, dialog} = win
+    const {focused, element, details, title, dialog} = win
     return (
         <WindowContext.Provider value={win}>
-            <Window title={title} onClose={() => win.close()}>
+            <Window
+                title={title}
+                focused={focused}
+                onClose={() => win.close()}
+                onMouseDown={() => {
+                    if (!focused) {
+                        win.focus()
+                    }
+                }}
+            >
                 <VStack flex={1} className="window-viewport">
                     {element}
                 </VStack>
@@ -294,9 +321,8 @@ const useAutoWindowSize = (
         // TODO: an "actual" solution to this that makes sure to reference the
         // correct window. Also probably involves storing window coordinates on
         // the instance and using that.
-        const windows = Array.from(document.querySelectorAll(".window"))
-        const prev = windows.reverse().find((el) => el !== elem)
-        if (prev) {
+        const prev = document.querySelector(".window.focused")
+        if (prev && prev !== elem) {
             const r = prev.getBoundingClientRect()
             top = r.top + 30
             left = r.left + 30
@@ -327,10 +353,9 @@ export const useDragListener = (
 
         const handleMouseDown = (e: MouseEvent) => {
             // Ignore events on interactive elements.
-            if ((e.target as HTMLElement).tagName === "BUTTON") {
-                return
+            if (!isInteractiveElement(e.target as HTMLElement)) {
+                shouldReportDrag = true
             }
-            shouldReportDrag = true
         }
 
         const handleMouseUp = () => {
@@ -360,4 +385,13 @@ export const useDragListener = (
  */
 const clamp = (value: number, min: number, max: number): number => {
     return Math.min(Math.max(value, min), max)
+}
+
+const isInteractiveElement = (elem: HTMLElement) => {
+    return (
+        elem.tagName === "BUTTON" ||
+        elem.tagName === "INPUT" ||
+        elem.tagName === "SELECT" ||
+        elem.tagName === "TEXTAREA"
+    )
 }

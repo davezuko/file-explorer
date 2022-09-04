@@ -28,6 +28,11 @@
     box-shadow: var(--window-shadow);
 }
 
+.window.focused {
+    --window-titlebar-bg: var(--window-titlebar-bg-focused);
+    z-index: 999;
+}
+
 .window-titlebar {
     display: flex;
     align-items: center;
