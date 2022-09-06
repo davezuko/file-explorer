@@ -113,17 +113,26 @@ const filepath = (item: FSItem): string => {
 }
 
 export class FSViewModel {
-    cwd: Directory
+    private _cwd: Directory
     selection: Selection<FSItem>
     expandedDirs: Set<Directory> = new Set()
 
     constructor(dir: Directory) {
-        this.cwd = dir
-        this.selection = new Selection(this.cwd.children)
-        makeAutoObservable(this, {
-            cwd: observable.ref,
+        this._cwd = dir
+        this.selection = new Selection(this._cwd.children)
+        makeAutoObservable<this, "_cwd">(this, {
+            _cwd: observable.ref,
             expandedDirs: observable.shallow,
         })
+    }
+
+    get cwd() {
+        return this._cwd
+    }
+
+    set cwd(dir: Directory) {
+        // TODO: track location change in history for back/forward history.
+        this._cwd = dir
     }
 
     expanded(item: FSItem): boolean {
