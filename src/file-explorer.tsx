@@ -121,7 +121,7 @@ const LocationEditor = ({view}: {view: FSViewModel}) => {
                     return (
                         <Fragment key={dir.path}>
                             {idx !== 0 && (
-                                <span style={{margin: "0 0.25rem"}}>{">"}</span>
+                                <span style={{margin: "0 0.15rem"}}>{"/"}</span>
                             )}
                             <Button onClick={() => (view.cwd = dir)}>
                                 {dir.name}
