@@ -9,9 +9,11 @@
 }
 
 .desktop-taskbar {
+    position: relative;
     height: 32px;
     background: var(--desktop-taskbar-bg);
     border-top: 1px solid var(--desktop-taskbar-border);
+    z-index: 2;
 }
 
 .desktop-taskbar button[aria-selected="true"] {
@@ -35,7 +37,7 @@
 
 .window.focused {
     --window-titlebar-bg: var(--window-titlebar-bg-focused);
-    z-index: 999;
+    z-index: 1;
 }
 
 .window-titlebar {
