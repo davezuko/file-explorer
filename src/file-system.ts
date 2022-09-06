@@ -58,7 +58,7 @@ export class Directory {
     }
 
     get deleted(): boolean {
-        return this._deleted || !!this.parent?._deleted
+        return this._deleted || !!this.parent?.deleted
     }
 
     delete() {
