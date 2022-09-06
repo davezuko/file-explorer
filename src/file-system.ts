@@ -195,10 +195,10 @@ export class FSViewModel {
         }
         this.selection = new Selection(this.cwd.children)
     }
+}
 
-    isNameAvailable(name: string): boolean {
-        return itemIndexByName(this.cwd.children, name) === -1
-    }
+export const isNameAvailable = (cwd: Directory, name: string): boolean => {
+    return itemIndexByName(cwd.children, name) === -1
 }
 
 /**

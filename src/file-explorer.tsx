@@ -6,6 +6,7 @@ import {
     FSViewModel,
     seedDirectory,
     parents,
+    isNameAvailable,
 } from "./file-system"
 import {FileTree} from "./file-tree"
 import {DirectoryView} from "./directory-view"
@@ -57,29 +58,30 @@ const FileExplorerToolbar = ({view}: {view: FSViewModel}) => {
     const wm = useWindowManager()
 
     const create = (type: FSItem["type"]) => {
+        // Spec: "The current selected directory is the parent" when
+        // creating a new file/directory. This is a bit awkward since
+        // the file tree supports multi-selection (not part of the
+        // base spec), so compromise by:
+        //
+        // 1. If only one item is selected and it's a directory, use
+        //    that as the parent.
+        // 2. Otherwise, use the cwd.
+        //
+        // TODO: the best solution would be to make the parent
+        // editable in the creation dialog.
+        const parent =
+            view.selection.size === 1 &&
+            view.selection.latest?.type === "directory"
+                ? view.selection.latest
+                : view.cwd
+
         win.openDialog(
-            "Create new...",
+            `Create item in "${parent.name}"`,
             <CreateItemForm
                 view={view}
+                parent={parent}
                 initialType={type}
                 onSubmit={(item) => {
-                    // Spec: "The current selected directory is the parent" when
-                    // creating a new file/directory. This is a bit awkward since
-                    // the file tree supports multi-selection (not part of the
-                    // base spec), so compromise by:
-                    //
-                    // 1. If only one item is selected and it's a directory, use
-                    //    that as the parent.
-                    // 2. Otherwise, use the cwd.
-                    //
-                    // TODO: the best solution would be to make the parent
-                    // editable in the creation dialog.
-                    const parent =
-                        view.selection.size === 1 &&
-                        view.selection.latest?.type === "directory"
-                            ? view.selection.latest
-                            : view.cwd
-
                     parent.add(item)
                     win.closeDialog()
                 }}
@@ -136,10 +138,12 @@ const LocationEditor = ({view}: {view: FSViewModel}) => {
 
 const CreateItemForm = ({
     view,
+    parent,
     initialType = "file",
     onSubmit,
 }: {
     view: FSViewModel
+    parent: Directory
     initialType?: FSItem["type"]
     onSubmit(item: FSItem): void
 }) => {
@@ -152,7 +156,7 @@ const CreateItemForm = ({
         const input = inputRef.current
         if (!name.trim()) {
             input.setCustomValidity("Name is required.")
-        } else if (!view.isNameAvailable(name)) {
+        } else if (!isNameAvailable(parent, name)) {
             input.setCustomValidity(
                 "A file or directory with this name already exists.",
             )
