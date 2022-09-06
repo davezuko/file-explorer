@@ -108,7 +108,7 @@ const useAvailableColumns = (
             const rect = entries[0].contentRect
             const cols = Math.floor(rect.width / ITEM_WIDTH)
             setColumns(cols)
-            setGutter((rect.width % cols) / 2)
+            setGutter((rect.width % ITEM_WIDTH) / 2)
         })
         ro.observe(ref.current)
         return () => {
