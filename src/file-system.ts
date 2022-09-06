@@ -34,6 +34,10 @@ export class File {
             return parts.at(-1) || ""
         }
     }
+
+    delete() {
+        this.parent = null
+    }
 }
 
 export class Directory {
@@ -62,7 +66,11 @@ export class Directory {
     }
 
     delete() {
+        this.parent = null
         this._deleted = true
+        for (const child of this.children) {
+            child.delete()
+        }
         this._children = []
     }
 
@@ -79,7 +87,7 @@ export class Directory {
     // now since this getter returns a cached value until children changes,
     // which yields acceptable performance. A better approach might be one of:
     //
-    // a. implement binary search insertion, since items are sorted.
+    // a. implement binary search insertion.
     // b. make users call .sort() when they are done manipulating the list, since
     //    we don't want to continually resort if items are added in bulk.
     // c. queue inserted items and only sort once .children is requested.
@@ -91,11 +99,11 @@ export class Directory {
 
     remove(items: Set<FSItem>) {
         this._children = this._children.filter((child) => {
-            if (!items.has(child)) return true
-            if (child.type === "directory") {
+            if (items.has(child)) {
                 child.delete()
+                return false
             }
-            return false
+            return true
         })
     }
 }

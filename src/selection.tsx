@@ -61,12 +61,7 @@ export class Selection<T> {
         this.add(item)
     }
 
-    selectRange(
-        items: T[],
-        start: number,
-        end: number,
-        selected: boolean = true,
-    ) {
+    selectRange(items: T[], start: number, end: number, selected = true) {
         if (start < 0) {
             throw new Error(`start index must be >= 0, got: ${start}`)
         }
