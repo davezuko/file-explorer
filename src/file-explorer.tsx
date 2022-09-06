@@ -227,6 +227,8 @@ export const FileIcon = ({
             ? "/img/icon-directory.png"
             : `/img/icon-file-${lookupIcon(item.ext)}.png`
 
+    // If the image failed to load, show the "unknown" icon rather
+    // than a broken image.
     if (error) {
         src = "/img/icon-file-unknown.png"
     }
@@ -248,7 +250,7 @@ const lookupIcon = (ext: string): string => {
         case "py":
         case "js":
         case "json":
-        case "ts":
+        case "jsx":
         case "ts":
         case "tsx":
             return "script"

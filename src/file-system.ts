@@ -214,7 +214,8 @@ export const seedDirectory = (root: Directory, count: number) => {
         "rb",
         "py",
         "js",
-        "ts",
+        "jsx",
+        "json",
         "ts",
         "tsx",
         "jpeg",
@@ -227,7 +228,6 @@ export const seedDirectory = (root: Directory, count: number) => {
         "swf",
         "webm",
     ]
-
     const dir = (name?: string) => {
         if (name) {
             return new Directory(name)
