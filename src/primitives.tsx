@@ -62,3 +62,16 @@ export const HStack = (props: IStack) => {
 export const cx = (...classes: (string | undefined | null | false)[]) => {
     return classes.filter(Boolean).join(" ")
 }
+
+export const truncate = (
+    str: string,
+    maxLen: number,
+    options?: {prefix: boolean},
+) => {
+    if (str.length <= maxLen) {
+        return str
+    }
+    return options?.prefix
+        ? "..." + str.slice(str.length - maxLen - 1)
+        : str.slice(0, maxLen) + "..."
+}

@@ -10,7 +10,7 @@ import {
 } from "./file-system"
 import {FileTree} from "./file-tree"
 import {DirectoryView} from "./directory-view"
-import {Button, HStack, VStack} from "./primitives"
+import {Button, HStack, truncate, VStack} from "./primitives"
 import {
     useWindowContext,
     useWindowDetails,
@@ -126,7 +126,7 @@ const LocationEditor = ({view}: {view: FSViewModel}) => {
                                 <span style={{margin: "0 0.15rem"}}>{"/"}</span>
                             )}
                             <Button onClick={() => (view.cwd = dir)}>
-                                {dir.name}
+                                {truncate(dir.name, 15, {prefix: true})}
                             </Button>
                         </Fragment>
                     )

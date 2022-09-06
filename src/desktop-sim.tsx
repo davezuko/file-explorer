@@ -9,7 +9,7 @@ import {
 } from "react"
 import {makeAutoObservable, observable, runInAction} from "mobx"
 import {observer} from "mobx-react-lite"
-import {Button, cx, HStack, VStack} from "./primitives"
+import {Button, cx, HStack, truncate, VStack} from "./primitives"
 
 const WINDOW_ASPECT_RATIO = 4 / 3
 const WINDOW_MIN_WIDTH = 640
@@ -119,7 +119,7 @@ let DesktopTaskbar = () => {
                             width={16}
                             style={{marginRight: "0.5rem"}}
                         />
-                        {win.title}
+                        {truncate(win.title, 20, {prefix: true})}
                     </Button>
                 )
             })}
@@ -163,7 +163,7 @@ const Window = ({
             onMouseDown={onMouseDown}
         >
             <header className="window-titlebar" ref={titlebarRef}>
-                <span className="window-title">{title}</span>
+                <span className="window-title truncate">{title}</span>
                 <HStack gap={0.25} className="window-buttons">
                     {canMinimize && <Button title="inop">-</Button>}
                     {canMaximize && <Button title="inop">+</Button>}

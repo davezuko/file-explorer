@@ -50,6 +50,10 @@
     user-select: none;
 }
 
+.window-title {
+    white-space: nowrap;
+}
+
 .window-buttons {
     margin-left: auto;
 }
