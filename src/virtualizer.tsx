@@ -9,6 +9,11 @@ interface IVirtualizer<T> {
     bufferSize?: number
     renderItem(item: T, position: {top: number}): React.ReactElement
 }
+
+// TODO: it's possible to entirely avoid a render when scroll position changes
+// if the already-rendered elements sufficiently cover the visible region.
+// This naive approach seems to yield acceptable performance right now, but
+// it's ripe for optimization.
 export let Virtualizer = <T,>({
     items,
     itemHeight,
@@ -59,7 +64,7 @@ export let Virtualizer = <T,>({
 
     return (
         <div className="virtualizer" ref={viewportRef} onScroll={handleScroll}>
-            <div style={{position: "relative", height: height + "px"}}>
+            <div className="virtualizer-body" style={{height: height + "px"}}>
                 {height > 0 && renderItems()}
             </div>
         </div>

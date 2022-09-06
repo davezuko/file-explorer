@@ -3,3 +3,7 @@
     width: 100%;
     overflow: auto;
 }
+
+.virtualizer-body {
+    position: relative;
+}
