@@ -133,7 +133,7 @@ export const getClickIntent = (e: MouseEvent): SelectionIntent | null => {
     }
     if (e.shiftKey) {
         return SelectionIntent.SelectRange
-    } else if (e.ctrlKey) {
+    } else if (e.ctrlKey || e.metaKey) {
         return SelectionIntent.ToggleOne
     } else {
         return SelectionIntent.SelectOne
