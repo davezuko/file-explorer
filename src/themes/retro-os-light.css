@@ -2,7 +2,8 @@
     --fg: #000;
     --bg: #008080;
 
-    --desktop-toolbar-bg: #d4d0c8;
+    --desktop-taskbar-bg: linear-gradient(90deg, #d4d0c8 20%, #d9d9d9 100%);
+    --desktop-taskbar-border: #000;
 
     --window-bg: #d4d0c8;
     --window-border: 1px solid rgb(200, 200, 200);

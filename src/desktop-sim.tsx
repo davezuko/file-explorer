@@ -94,11 +94,39 @@ export let Desktop = ({windows: wm}: {windows: WindowManager}) => {
                         return <WindowObserver key={win.id} window={win} />
                     })}
                 </div>
+                <DesktopTaskbar />
             </div>
         </WindowManagerContext.Provider>
     )
 }
 Desktop = observer(Desktop)
+
+// TODO: handle horizontal overflow.
+let DesktopTaskbar = () => {
+    const wm = useWindowManager()
+    return (
+        <HStack gap={0.5} className="desktop-taskbar">
+            {wm.windows.map((win) => {
+                return (
+                    <Button
+                        key={win.id}
+                        onClick={() => win.focus()}
+                        aria-selected={win.focused}
+                    >
+                        <img
+                            src="/img/icon-file-explorer.png"
+                            height={16}
+                            width={16}
+                            style={{marginRight: "0.5rem"}}
+                        />
+                        {win.title}
+                    </Button>
+                )
+            })}
+        </HStack>
+    )
+}
+DesktopTaskbar = observer(DesktopTaskbar)
 
 /**
  * Renders a simulated desktop window.
