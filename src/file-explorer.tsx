@@ -21,12 +21,16 @@ export let FileExplorer = ({root}: {root: Directory}) => {
     const view = useMemo(() => new FSViewModel(root), [root])
     const items = view.cwd.children.length
     useWindowTitle("File Explorer", view.cwd.name)
-    useWindowDetails(
-        !view.cwd.deleted && `${items} ${items === 1 ? "item" : "items"}`,
-    )
-    useEffect(() => {
-        view.selection.clear()
-    }, [view.cwd])
+
+    let details = ""
+    if (!view.cwd.deleted) {
+        details = `${items} ${items === 1 ? "item" : "items"}`
+        const selected = view.selection.size
+        if (selected > 0) {
+            details += ` (${selected} selected)`
+        }
+    }
+    useWindowDetails(details)
 
     if (view.cwd.deleted) {
         return (

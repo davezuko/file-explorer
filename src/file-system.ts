@@ -131,6 +131,7 @@ export class FSViewModel {
     }
 
     set cwd(dir: Directory) {
+        this.selection.clear()
         // TODO: track location change in history for back/forward history.
         this._cwd = dir
     }
