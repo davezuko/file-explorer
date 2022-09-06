@@ -116,7 +116,7 @@ const LocationEditor = ({view}: {view: FSViewModel}) => {
     return (
         <HStack gap={1} align="center" style={{marginLeft: "0.25rem"}}>
             <span>Location:</span>
-            <HStack gap={0.5} align="center">
+            <HStack gap={0.5} align="center" style={{overflow: "auto"}}>
                 {path.map((dir, idx) => {
                     return (
                         <Fragment key={dir.path}>

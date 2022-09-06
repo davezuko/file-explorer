@@ -1,4 +1,4 @@
-import {computed, makeAutoObservable, observable, runInAction} from "mobx"
+import {computed, makeAutoObservable, observable} from "mobx"
 import {Selection} from "./selection"
 
 /**
@@ -203,8 +203,9 @@ export const parents = (item: FSItem): Directory[] => {
     return parents
 }
 
-export const seedDirectory = (root: Directory, count: number) => {
-    let counter = 1
+let filenameSuffix = 1
+
+export const seedDirectory = (root: Directory, total: number) => {
     const extensions = [
         "txt",
         "ppt",
@@ -229,54 +230,47 @@ export const seedDirectory = (root: Directory, count: number) => {
         "swf",
         "webm",
     ]
+
+    let remaining = total
+
     const dir = (name?: string) => {
+        remaining--
         if (name) {
             return new Directory(name)
         }
-        return new Directory(`directory-${counter++}`)
+        return new Directory(`directory-${filenameSuffix++}`)
     }
-
     const file = (name?: string) => {
+        remaining--
         if (name) {
             return new File(name)
         }
         const ext = extensions[Math.floor(Math.random() * extensions.length)]
-        return new File(`file-${counter++}.${ext}`)
+        return new File(`file-${filenameSuffix++}.${ext}`)
     }
 
-    runInAction(() => {
-        {
-            let d = root.add(dir("directory-1"))
-            d.add(file())
-            d.add(file())
-            d.add(file())
+    // Please just ignore how awful this function is. I threw something
+    // together to try to get a realistic distribution of files vs. folders
+    // that trails off the deeper you get. It works "fine" for a demo.
+    const seed = (parent: Directory, max: number) => {
+        if (!remaining) return
+
+        const items = Math.ceil(Math.random() * max)
+        const fcount = Math.round(items * 0.75)
+        const dcount = Math.min(items - fcount, 3)
+
+        for (let i = 0; i < fcount; i++) {
+            if (!remaining) return
+            parent.add(file())
         }
-        {
-            let d = root.add(dir("directory-2"))
-            d.add(file())
-            d.add(file())
-            d.add(file())
-            {
-                let dd = d.add(dir("directory-1"))
-                dd.add(file())
-                dd.add(file())
-                dd.add(file())
-            }
-            {
-                let dd = d.add(dir("directory-2"))
-                dd.add(file())
-                dd.add(file())
-                dd.add(file())
-                {
-                    let ddd = dd.add(dir("directory-1"))
-                    ddd.add(file())
-                    ddd.add(file())
-                    ddd.add(file())
-                }
-            }
+        for (let i = 0; i < dcount; i++) {
+            if (remaining < 2) return
+            const d = parent.add(dir())
+            seed(d, Math.ceil(Math.random() * (items / dcount)))
         }
-        for (let i = 1; i <= count; i++) {
-            root.add(file())
-        }
-    })
+    }
+
+    while (remaining > 0) {
+        seed(root, remaining)
+    }
 }
