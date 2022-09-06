@@ -5,6 +5,7 @@ import {FSViewModel} from "./file-system"
 import {Virtualizer, FSTreeItem, FSTreeVirtualizer} from "./virtualizer"
 import {cx, HStack} from "./primitives"
 import {FileIcon} from "./file-explorer"
+import {getKeyboardIntent, SelectionIntent} from "./selection"
 
 export let FileTree = ({view}: {view: FSViewModel}) => {
     const virtualizer = useMemo(() => new FSTreeVirtualizer(view), [view])
@@ -19,16 +20,18 @@ export let FileTree = ({view}: {view: FSViewModel}) => {
             tabIndex={0}
             className="file-tree panel"
             onKeyDown={(e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === "a") {
-                    e.preventDefault()
-                    view.selection.selectRange(
-                        view.cwd.children,
-                        0,
-                        Infinity,
-                        true,
-                    )
-                } else if (e.key === "Delete" || e.key === "Backspace") {
-                    view.deleteSelection()
+                switch (getKeyboardIntent(e.nativeEvent)) {
+                    case SelectionIntent.SelectAll:
+                        e.preventDefault()
+                        view.selection.selectRange(
+                            view.cwd.children,
+                            0,
+                            Infinity,
+                        )
+                        break
+                    case SelectionIntent.Delete:
+                        view.deleteSelection()
+                        break
                 }
             }}
         >

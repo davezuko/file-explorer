@@ -56,7 +56,12 @@ export class Selection<T> {
         }
     }
 
-    selectRange(items: T[], start: number, end: number, selected: boolean) {
+    selectRange(
+        items: T[],
+        start: number,
+        end: number,
+        selected: boolean = true,
+    ) {
         if (start < 0) {
             throw new Error(`start index must be >= 0, got: ${start}`)
         }
@@ -83,15 +88,50 @@ export class Selection<T> {
     }
 
     fromClickEvent(items: T[], item: T, e: MouseEvent) {
-        if (e.shiftKey) {
-            const start = items.indexOf(item)
-            const end = items.indexOf(this.latest!)
-            this.selectRange(items, start, end, true)
-        } else if (e.ctrlKey) {
-            this.toggle(item)
-        } else {
-            this.clear()
-            this.add(item)
+        switch (getClickIntent(e)) {
+            case SelectionIntent.SelectRange: {
+                const start = items.indexOf(item)
+                const end = items.indexOf(this.latest!)
+                this.selectRange(items, start, end, true)
+                break
+            }
+            case SelectionIntent.ToggleOne:
+                this.toggle(item)
+                break
+            case SelectionIntent.SelectOne:
+                this.clear()
+                this.add(item)
+                break
         }
+    }
+}
+
+export enum SelectionIntent {
+    ToggleOne,
+    SelectOne,
+    SelectRange,
+    SelectAll,
+    Delete,
+}
+export const getKeyboardIntent = (e: KeyboardEvent): SelectionIntent | null => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "a") {
+        return SelectionIntent.SelectAll
+    } else if (e.key === "Delete" || e.key === "Backspace") {
+        return SelectionIntent.Delete
+    }
+    return null
+}
+
+export const getClickIntent = (e: MouseEvent): SelectionIntent | null => {
+    // only listen to clicks made with the left mouse button.
+    if (e.button !== 0) {
+        return null
+    }
+    if (e.shiftKey) {
+        return SelectionIntent.SelectRange
+    } else if (e.ctrlKey) {
+        return SelectionIntent.ToggleOne
+    } else {
+        return SelectionIntent.SelectOne
     }
 }

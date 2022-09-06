@@ -5,6 +5,7 @@ import {FSItem, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
 import {cx, HStack, VStack} from "./primitives"
 import {FileIcon} from "./file-explorer"
+import {getKeyboardIntent, SelectionIntent} from "./selection"
 
 // TODO: compute at render time.
 const ITEM_WIDTH = 72
@@ -71,16 +72,18 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
                 }
             }}
             onKeyDown={(e) => {
-                if ((e.ctrlKey || e.metaKey) && e.key === "a") {
-                    e.preventDefault()
-                    view.selection.selectRange(
-                        view.cwd.children,
-                        0,
-                        Infinity,
-                        true,
-                    )
-                } else if (e.key === "Delete" || e.key === "Backspace") {
-                    view.deleteSelection()
+                switch (getKeyboardIntent(e.nativeEvent)) {
+                    case SelectionIntent.SelectAll:
+                        e.preventDefault()
+                        view.selection.selectRange(
+                            view.cwd.children,
+                            0,
+                            Infinity,
+                        )
+                        break
+                    case SelectionIntent.Delete:
+                        view.deleteSelection()
+                        break
                 }
             }}
         >
@@ -124,7 +127,12 @@ let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
                 selected && "selected",
             )}
             onClick={(e) => {
+                // Stop propagation because our parent is listening for
+                // unhandled click events to clear the current selection.
                 e.stopPropagation()
+
+                // if a directory is double-clicked, open that dir. We don't
+                // yet support opening files.
                 if (e.detail > 1) {
                     if (item.type === "directory") {
                         view.cwd = item
