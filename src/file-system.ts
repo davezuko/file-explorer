@@ -83,14 +83,18 @@ export class Directory {
         return item
     }
 
-    // TODO: sort items as they are added to the list. I've skipped that for
-    // now since this getter returns a cached value until children changes,
-    // which yields acceptable performance. A better approach might be one of:
-    //
-    // a. implement binary search insertion.
-    // b. make users call .sort() when they are done manipulating the list, since
-    //    we don't want to continually resort if items are added in bulk.
-    // c. queue inserted items and only sort once .children is requested.
+    /**
+     * Directory children in alphabetical order.
+     *
+     * TODO: sort items as they are added to the list. I've skipped that for
+     * now since this getter returns a cached value until children changes,
+     * which yields acceptable performance. A better approach might be one of:
+     *
+     * a. implement binary search insertion.
+     * b. make users call .sort() when they are done manipulating the list, since
+     *    we don't want to continually resort if items are added in bulk.
+     * c. queue inserted items and only sort once .children is requested.
+     */
     get children() {
         return this._children
             .slice()
@@ -192,12 +196,30 @@ export class FSViewModel {
         this.selection = new Selection(this.cwd.children)
     }
 
-    // TODO: verify performance on large number of elements. May be faster
-    // to store cwd.children in sorted order and binary search to see if
-    // an item exists with this name.
     isNameAvailable(name: string): boolean {
-        return !this.cwd.children.find((item) => item.name === name)
+        return itemIndexByName(this.cwd.children, name) === -1
     }
+}
+
+/**
+ * Finds the index of an item whose .name matches the reference string. The list
+ * must be sorted alphabetically (Directory.children is sorted by default).
+ */
+const itemIndexByName = (items: FSItem[], name: string): number => {
+    let start = 0
+    let end = items.length - 1
+    while (start <= end) {
+        let pivot = Math.floor((start + end) / 2)
+        if (items[pivot]?.name === name) {
+            return pivot
+        }
+        if (name.localeCompare(items[pivot].name) === -1) {
+            end = pivot - 1
+        } else {
+            start = pivot + 1
+        }
+    }
+    return -1
 }
 
 export const parents = (item: FSItem): Directory[] => {
