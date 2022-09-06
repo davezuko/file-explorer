@@ -4,6 +4,7 @@
 }
 
 .directory-view-row {
+    position: absolute;
     height: 75px;
     width: 100%;
     padding: 0 var(--gutter);

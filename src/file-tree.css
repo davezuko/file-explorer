@@ -5,6 +5,7 @@
 }
 
 .file-tree-item {
+    position: absolute;
     min-width: 100%;
     padding-left: calc(0.25rem + var(--depth, 0) * 1.3rem);
     white-space: nowrap;

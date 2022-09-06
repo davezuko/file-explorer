@@ -1,5 +1,5 @@
 import "./directory-view.css"
-import {useCallback, useEffect, useMemo, useRef, useState} from "react"
+import {memo, useCallback, useEffect, useMemo, useRef, useState} from "react"
 import {observer} from "mobx-react-lite"
 import {FSItem, FSViewModel} from "./file-system"
 import {Virtualizer} from "./virtualizer"
@@ -34,28 +34,16 @@ export let DirectoryView = ({view}: {view: FSViewModel}) => {
         return rows
     }, [cols, view.cwd.children, view.cwd.children.length])
 
-    const renderItem = useCallback(
-        (row: FSItem[], style: React.CSSProperties) => {
-            return (
-                <HStack
-                    key={row[0].name}
-                    style={style}
-                    className="directory-view-row"
-                >
-                    {row.map((item) => {
-                        return (
-                            <DirectoryViewItem
-                                key={item.name}
-                                item={item}
-                                view={view}
-                            />
-                        )
-                    })}
-                </HStack>
-            )
-        },
-        [],
-    )
+    const renderItem = useCallback((row: FSItem[], {top}: {top: number}) => {
+        return (
+            <DirectoryViewRow
+                key={row[0].name}
+                row={row}
+                top={top}
+                view={view}
+            />
+        )
+    }, [])
 
     return (
         <div
@@ -117,6 +105,31 @@ const useAvailableColumns = (
     }, [ref, width])
     return [columns, gutter]
 }
+
+let DirectoryViewRow = ({
+    row,
+    view,
+    top,
+}: {
+    row: FSItem[]
+    view: FSViewModel
+    top: number
+}) => {
+    return (
+        <HStack style={{top: top + "px"}} className="directory-view-row">
+            {row.map((item) => {
+                return (
+                    <DirectoryViewItem
+                        key={item.name}
+                        item={item}
+                        view={view}
+                    />
+                )
+            })}
+        </HStack>
+    )
+}
+DirectoryViewRow = memo(DirectoryViewRow) as any
 
 let DirectoryViewItem = ({item, view}: {item: FSItem; view: FSViewModel}) => {
     const selected = view.selected(item)

@@ -7,7 +7,7 @@ interface IVirtualizer<T> {
     items: T[]
     itemHeight: number
     bufferSize?: number
-    renderItem(item: T, style: React.CSSProperties): React.ReactElement
+    renderItem(item: T, position: {top: number}): React.ReactElement
 }
 export let Virtualizer = <T,>({
     items,
@@ -52,12 +52,7 @@ export let Virtualizer = <T,>({
             if (!item) {
                 break
             }
-            children.push(
-                renderItem(item, {
-                    position: "absolute",
-                    top: i * itemHeight + "px",
-                }),
-            )
+            children.push(renderItem(item, {top: i * itemHeight}))
         }
         return children
     }

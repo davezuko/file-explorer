@@ -10,8 +10,8 @@ import {getClickIntent, getKeyboardIntent, SelectionIntent} from "./selection"
 export let FileTree = ({view}: {view: FSViewModel}) => {
     const virtualizer = useMemo(() => new FSTreeVirtualizer(view), [view])
     const renderItem = useCallback(
-        (item: FSTreeItem, style: React.CSSProperties) => {
-            return <FileTreeItem {...item} view={view} style={style} />
+        (item: FSTreeItem, {top}: {top: number}) => {
+            return <FileTreeItem {...item} view={view} top={top} />
         },
         [view],
     )
@@ -51,10 +51,10 @@ let FileTreeItem = ({
     setSize,
     posInSet,
     view,
-    style,
+    top,
     items: treeItems,
     index,
-}: FSTreeItem & {view: FSViewModel; style: React.CSSProperties}) => {
+}: FSTreeItem & {view: FSViewModel; top: number}) => {
     const selected = view.selected(item)
     const expanded = view.expanded(item)
     const prefix = () => {
@@ -86,7 +86,7 @@ let FileTreeItem = ({
             align="center"
             className={cx("file-tree-item selectable", selected && "selected")}
             role="treeitem"
-            style={{...style, "--depth": depth} as React.CSSProperties}
+            style={{"--depth": depth, top: top + "px"} as React.CSSProperties}
             tabIndex={0}
             aria-label={item.name}
             aria-setsize={setSize}
