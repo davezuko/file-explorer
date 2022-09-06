@@ -31,7 +31,7 @@ Start the web app (`yarn start` or `yarn serve`) and visit http://localhost:3000
 
 ### Shortcuts
 
--   **Toggle selected**: <kbd>ctrl</kbd> + <kbd>click</kbd>
+-   **Toggle selected**: <kbd>ctrl</kbd> + <kbd>click</kbd> (mac: <kbd>meta</kbd> + <kbd>click</kbd>)
 -   **Select range**: <kbd>shift</kbd> + <kbd>click</kbd>
 -   **Select all**: <kbd>ctrl</kbd> + <kbd>a</kbd>
 -   **Delete selection**: <kbd>Delete</kbd>
