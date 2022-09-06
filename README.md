@@ -1,8 +1,14 @@
+# File Explorer
+
+Try it here: https://davezuko-file-explorer.netlify.app
+
+![File Explorer](./preview.png)
+
 ## Get Started
 
 Requirements:
 
--   node @ ^10.18.0
+-   node @ ^16.0.0
 -   yarn ^1.10.1
 
 ```sh
