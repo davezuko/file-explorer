@@ -56,6 +56,11 @@ export class Selection<T> {
         }
     }
 
+    selectOne(item: T) {
+        this.clear()
+        this.add(item)
+    }
+
     selectRange(
         items: T[],
         start: number,
@@ -99,8 +104,7 @@ export class Selection<T> {
                 this.toggle(item)
                 break
             case SelectionIntent.SelectOne:
-                this.clear()
-                this.add(item)
+                this.selectOne(item)
                 break
         }
     }

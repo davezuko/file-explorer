@@ -78,6 +78,13 @@ export interface FSTreeItem {
     depth: number
     setSize: number
     posInSet: number
+
+    // TODO: this is kind of leaky. We need a way to select a range of items
+    // in the file tree when they're distributed across different directories.
+    // There's definitely a better solution here, but this fixes the immediate
+    // problem of range selection being broken when it spans multiple directories.
+    items: FSTreeItem[]
+    index: number
 }
 export class FSTreeVirtualizer {
     private view: FSViewModel
@@ -93,12 +100,20 @@ export class FSTreeVirtualizer {
     // that we don't have to walk the whole tree when only a subset is needed.
     get items(): FSTreeItem[] {
         const items: FSTreeItem[] = []
+
+        // an item's original index from the view model.
+        let index = 0
+
         const walk = (dir: Directory, depth = 0) => {
             for (let i = 0; i < dir.children.length; i++) {
+                index++
+
                 const item = dir.children[i]
                 items.push({
                     key: item.path,
                     item,
+                    items,
+                    index,
                     setSize: dir.children.length,
                     posInSet: i,
                     depth,

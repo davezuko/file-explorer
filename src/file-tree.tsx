@@ -5,7 +5,7 @@ import {FSViewModel} from "./file-system"
 import {Virtualizer, FSTreeItem, FSTreeVirtualizer} from "./virtualizer"
 import {cx, HStack} from "./primitives"
 import {FileIcon} from "./file-explorer"
-import {getKeyboardIntent, SelectionIntent} from "./selection"
+import {getClickIntent, getKeyboardIntent, SelectionIntent} from "./selection"
 
 export let FileTree = ({view}: {view: FSViewModel}) => {
     const virtualizer = useMemo(() => new FSTreeVirtualizer(view), [view])
@@ -52,6 +52,8 @@ let FileTreeItem = ({
     posInSet,
     view,
     style,
+    items: treeItems,
+    index,
 }: FSTreeItem & {view: FSViewModel; style: React.CSSProperties}) => {
     const selected = view.selected(item)
     const expanded = view.expanded(item)
@@ -95,11 +97,24 @@ let FileTreeItem = ({
                 "aria-expanded": expanded,
             })}
             onClick={(e) => {
-                view.selection.fromClickEvent(
-                    view.cwd.children,
-                    item,
-                    e.nativeEvent,
-                )
+                switch (getClickIntent(e.nativeEvent)) {
+                    case SelectionIntent.SelectRange: {
+                        // We can't just select a range of indices from the cwd
+                        // since we may be rendering expanded child directories.
+                        // Instead, select from the virtualized items.
+                        const items = treeItems.map((ti) => ti.item)
+                        const start = index
+                        const end = items.indexOf(view.selection.latest!)
+                        view.selection.selectRange(items, start, end, true)
+                        break
+                    }
+                    case SelectionIntent.ToggleOne:
+                        view.selection.toggle(item)
+                        break
+                    case SelectionIntent.SelectOne:
+                        view.selection.selectOne(item)
+                        break
+                }
             }}
         >
             {prefix()}
